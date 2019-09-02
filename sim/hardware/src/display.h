@@ -16,3 +16,4 @@ void display_clear(uint16_t color);
 void display_update(void);
 void display_update_rect(rect_t r);
 void display_drain(void);
+void display_deinit(void);

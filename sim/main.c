@@ -6,72 +6,16 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+#include <endian.h>
 
-#include <SDL2/SDL.h>
+#include <display.h>
 
 #include <gbuf.h>
 #include <graphics.h>
 #include <OpenSans_Regular_11X12.h>
 #include <tf.h>
 
-const int SCREEN_WIDTH = 320;
-const int SCREEN_HEIGHT = 240;
-
-// TODO: Move to display_sdl.h
-static SDL_Window* window = NULL;
-static SDL_Renderer* renderer = NULL;
-static SDL_Texture* canvas = NULL;
-gbuf_t *fb;
-
-int display_init() {
-	if ( SDL_Init(SDL_INIT_VIDEO) < 0) {
-			fprintf(stderr, "error initializing SDL: %s\n", SDL_GetError());
-			return -1;
-	}
-	window = SDL_CreateWindow("ogo-fm", 
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-	if (window == NULL) {
-		fprintf(stderr, "error creating SDL window: %s\n", SDL_GetError());
-		return -1;
-	}
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
-		fprintf(stderr, "error creating SDL renderer: %s\n", SDL_GetError());
-		return -1;
-	}
-	// TODO: Not sure if this works with RGB565
-	canvas = SDL_CreateTexture(renderer, 
-			SDL_PIXELFORMAT_RGB565,
-			SDL_TEXTUREACCESS_STREAMING,
-			SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
-	fb = gbuf_new(SCREEN_WIDTH, SCREEN_HEIGHT, 2, LITTLE_ENDIAN);
-}
-
-void display_deinit() {
-	gbuf_free(fb);
-	SDL_DestroyTexture(canvas);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-}
-
-void display_clear(uint16_t color) {
-	// TODO: Clear canas
-}
-
-void display_update(void) {
-	// TODO: Copy gbuf to canvas and update screen
-	int pitch;
-	void *pixels;
-	SDL_LockTexture(canvas, NULL, &pixels, &pitch);
-	memcpy(pixels, fb->data, fb->width * fb->height * fb->bytes_per_pixel);
-	SDL_UnlockTexture(canvas);
-	SDL_RenderCopy(renderer, canvas, NULL, NULL);
-	SDL_RenderPresent(renderer);
-}
+#include <SDL2/SDL.h>
 
 int ls(const char* path, tf_t *font) {
 	DIR *dir = opendir(path);
@@ -95,29 +39,137 @@ int ls(const char* path, tf_t *font) {
 	closedir(dir);
 }
 
+typedef enum Event {
+	NONE,
+
+	KEY_UP,
+	KEY_RIGHT,
+	KEY_DOWN,
+	KEY_LEFT,
+	KEY_A,
+	KEY_B,
+	KEY_START,
+	KEY_SELECT,
+	KEY_MENU,
+	KEY_VOLUME,
+
+	QUIT,
+	RESIZE,
+} Event;
+
+#define RETURN_EVENT(ev) *event = ev; return 0;
+
+
+
+int wait_event(Event *event) {
+	static SDL_Event e;
+
+	for(;;) {
+		if (!SDL_WaitEvent(&e)) {
+			return -1;
+		}
+
+		switch (e.type) {
+			case SDL_KEYDOWN:
+				// TODO: Map SDL Key events to Event
+				switch(e.key.keysym.sym) {
+				case SDLK_UP:
+					RETURN_EVENT(KEY_UP);
+					break;
+				case SDLK_DOWN:
+					RETURN_EVENT(KEY_DOWN);
+					break;
+				case SDLK_RIGHT:
+					RETURN_EVENT(KEY_RIGHT);
+					break;
+				case SDLK_LEFT:
+					RETURN_EVENT(KEY_LEFT);
+					break;
+				}
+				break;
+			case SDL_QUIT:
+				RETURN_EVENT(QUIT);
+				break;
+			case SDL_WINDOWEVENT:
+				RETURN_EVENT(RESIZE);
+				break;
+			default:
+				break;
+		}
+
+	}
+}
+
+const char* entries[] = {
+	"Dir 1",
+	"Dir 2",
+	"File 1",
+
+	"File 2",
+	"File 3",
+	"File 4",
+};
+
+void draw_selection(int selection) {
+	for (int i = 0; i < 6; i++) {
+		const uint16_t bg_color = i == selection ? 0xDB60 : 0x4A69;
+		// Draw background of entry
+		const int y_start = 20;
+		const int height = 16;
+		fill_rectangle(fb, (rect_t){.x = 0, .y = y_start + i * height, .width = DISPLAY_WIDTH, .height = height}, bg_color);
+		// Draw text on top
+		tf_t *font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_ALIGN_CENTER);
+		tf_draw_str(fb, font_white, entries[i], (point_t){.y = y_start + i * height + 2, .x = 3});
+	}
+	display_update();
+}
+
+
 int main(int argc, char const* argv[])
 {
 	display_init();
 
 	tf_t *font = tf_new(&font_OpenSans_Regular_11X12, 0x0000, 0, TF_ALIGN_CENTER);
 	tf_t *font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_ALIGN_CENTER);
-	fill_rectangle(fb, (rect_t){.x = 0, .y = 0, .width = SCREEN_WIDTH, .height = 16}, 0xFFFF);
+	fill_rectangle(fb, (rect_t){.x = 0, .y = 0, .width = DISPLAY_WIDTH, .height = 16}, 0xFFFF);
 	tf_draw_str(fb, font, "ogo-fm", (point_t){.x = 40, .y = 3});
-	ls(".", font_white);
 	display_update();
 
 	bool quit = false;
+	int selection = 0;
+	Event event;
+	draw_selection(selection);
 	while(!quit) {
 		// Handle inputs
-		SDL_Event e;
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
+		wait_event(&event);
+		switch(event) {
+			case QUIT:
 				quit = true;
 				break;
-			}
-			display_update();
+			case RESIZE:
+				display_update();
+				break;
+			case KEY_UP:
+				printf("UP!\n");
+				if(--selection < 0) {
+					selection = 0;
+				}
+				draw_selection(selection);
+				break;
+			case KEY_DOWN:
+				printf("DOWN!\n");
+				if(++selection > 5) {
+					selection = 5;
+				}
+				draw_selection(selection);
+				break;
+			case KEY_RIGHT:
+				printf("RIGHT!\n");
+				break;
+			case KEY_LEFT:
+				printf("LEFT!\n");
+				break;
 		}
-
 	}
 
 	display_deinit();
