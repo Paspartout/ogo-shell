@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <endian.h>
 
-#include "display.h"
+#include <display.h>
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -34,7 +34,7 @@ display_init2(void)
 			DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	SDL_RenderSetLogicalSize(renderer, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-	fb = gbuf_new(DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, LITTLE_ENDIAN);
+	fb = gbuf_new(DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, false);
 	return 0;
 }
 
@@ -44,7 +44,7 @@ display_init(void)
 	display_init2();
 }
 
-void display_deinit(void) {
+void display_poweroff(void) {
 	gbuf_free(fb);
 	SDL_DestroyTexture(canvas);
 	SDL_DestroyRenderer(renderer);
@@ -53,12 +53,12 @@ void display_deinit(void) {
 }
 
 void display_clear(uint16_t color) {
-	// TODO: Clear canas
+	// TODO: Clear canvas
 	display_update();
 }
 
+// Copy gbuf to SDL canvas and update screen
 void display_update(void) {
-	// TODO: Copy gbuf to canvas and update screen
 	int pitch;
 	void *pixels;
 	SDL_LockTexture(canvas, NULL, &pixels, &pitch);
@@ -74,6 +74,4 @@ void display_update_rect(rect_t r) {
 }
 
 void display_drain() {
-
 }
-

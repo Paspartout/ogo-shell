@@ -1,7 +1,6 @@
-#include <stdint.h>
+#pragma once
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
+#include <stdint.h>
 
 enum {
     KEYPAD_UP     = 1,

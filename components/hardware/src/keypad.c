@@ -1,8 +1,7 @@
 #include <stdint.h>
 
-#include "driver/adc.h"
-
-#include "keypad.h"
+#include <driver/adc.h>
+#include <keypad.h>
 
 
 #define KEYPAD_IO_X ADC1_CHANNEL_6

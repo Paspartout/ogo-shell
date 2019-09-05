@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <assert.h>
 
 #include "graphics.h"
 
@@ -60,13 +61,15 @@ void blit(gbuf_t *dst, rect_t dst_rect, gbuf_t *src, rect_t src_rect)
     }
 
     if (src->bytes_per_pixel == 2 && dst->bytes_per_pixel == 2) {
-        if (src->endian == dst->endian) {
+        if (src->big_endian == dst->big_endian) {
+            // Simply copy memory line wise
             for (short yoff = 0; yoff < dst_rect.height; yoff++) {
                 uint16_t *dst_addr = ((uint16_t *)dst->data) + (dst_rect.y + yoff) * dst->width + dst_rect.x;
                 uint16_t *src_addr = ((uint16_t *)src->data) + (src_rect.y + yoff) * src->width + src_rect.x;
                 memcpy(dst_addr, src_addr, dst_rect.width * dst->bytes_per_pixel);
             }
         } else {
+            // Copy memory and do byte swap
             for (short yoff = 0; yoff < dst_rect.height; yoff++) {
                 uint16_t *dst_addr = ((uint16_t *)dst->data) + (dst_rect.y + yoff) * dst->width + dst_rect.x;
                 uint16_t *src_addr = ((uint16_t *)src->data) + (src_rect.y + yoff) * src->width + src_rect.x;
@@ -82,7 +85,7 @@ void draw_line(gbuf_t *g, point_t start, point_t end, draw_style_t style, uint16
 {
     short inc, dx, dy;
 
-    if (g->endian == BIG_ENDIAN) {
+    if (g->big_endian) {
         color = color << 8 | color >> 8;
     }
 
@@ -173,7 +176,7 @@ void draw_rectangle3d(gbuf_t *g, rect_t r, uint16_t color_nw, uint16_t color_se)
 
 void fill_rectangle(gbuf_t *g, rect_t rect, uint16_t color)
 {
-    if (g->endian == BIG_ENDIAN) {
+    if (g->big_endian) {
         color = color << 8 | color >> 8;
     }
 

@@ -1,18 +1,26 @@
-CFLAGS := -I hardware/src/ -I graphics/ `sdl2-config --cflags` -O1 -g
-LDFLAGS := 
+CFLAGS := -I ../components/hardware/include -I ../components/graphics -I ../main `sdl2-config --cflags` -O1 -g -DSIM=1 -Wall -Werror
 LDLIBS := -lSDL2
 
-all: main
+# TODO: Header dependencies
 
-main: main.o \
-	display_sdl.o \
-	hardware/src/gbuf.o \
-	graphics/graphics.o \
-	graphics/tf.o \
-	graphics/OpenSans_Regular_11X12.o
+TARGET := ogo-fm
 
-hardware/src/gbuf.o: hardware/src/gbuf.c
-main.o: main.c
+SRC := ../main/main.o \
+	../sim/hardware/display.o \
+	../sim/hardware/event.o \
+	../sim/hardware/keypad.o \
+	../components/hardware/src/gbuf.o \
+	../components/graphics/graphics.o \
+	../components/graphics/tf.o \
+	../components/graphics/OpenSans_Regular_11X12.o
 
+OBJ := ${SRC:.c=.o}
 
-.PHONY: all
+$(TARGET): ${OBJ}
+	@echo LD $@
+	@${CC} ${LDFLAGS} -o $@ $^ ${LDLIBS}
+
+clean:
+	rm -f ${TARGET} ${OBJ}
+
+.PHONY: clean

@@ -151,7 +151,7 @@ short tf_draw_glyph(gbuf_t *g, tf_t *tf, char c, point_t p)
     }
 
     uint16_t color = tf->color;
-    if (g->endian == BIG_ENDIAN) {
+    if (g->big_endian) {
         color = color << 8 | color >> 8;
     }
 

@@ -1,2 +1,6 @@
+build/
+sdkconfig.old
+TODO.md
+tags
 *.o
-main
+sim/ogo-fm
