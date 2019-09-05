@@ -46,12 +46,12 @@ No managing, just browsing the FS.
 	- [ ] Docs?
 
 - [ ] Setup vscode properly
-	- [ ] include paths
+	- [x] include paths
 	- [ ] Makefile support
 	- [ ] building + debugging simulation
 	- [ ] building odroid go version?
 
-- [ ] Create needed api overview for fs
+- [ ] Create needed api overview for fs, draft program flow
 	- [ ] Look at rover, nnn, noice and 3DShell for reference
 
 - [ ] Implement GUI List with scrolling and single line selection

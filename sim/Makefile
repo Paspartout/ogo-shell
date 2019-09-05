@@ -9,6 +9,8 @@ SRC := ../main/main.o \
 	../sim/hardware/display.o \
 	../sim/hardware/event.o \
 	../sim/hardware/keypad.o \
+	../sim/hardware/backlight.o \
+	../sim/hardware/system.o \
 	../components/hardware/src/gbuf.o \
 	../components/graphics/graphics.o \
 	../components/graphics/tf.o \
