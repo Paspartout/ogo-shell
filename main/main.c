@@ -32,7 +32,7 @@
 #define ARRAY_LENGTH(array) (sizeof((array))/sizeof((array)[0]))
 
 const char* entries[] = {
-	"Dir 1",
+	"ABCDEFG",
 	"Dir 2",
 	"File 1",
 	"File 2",
@@ -47,6 +47,43 @@ const char* entries[] = {
 	"File 1123123",
 	"Dir 1",
 	"Dir 2",
+	"File 1",
+	"File 2",
+	"File 3",
+	"File 4",
+	"File 5",
+	"File 6",
+	"File 7",
+	"File 8",
+	"File 9",
+	"File 1000",
+	"File 1123123",
+	"ABCDEFG",
+	"Dir 2",
+	"File 1",
+	"File 2",
+	"File 3",
+	"File 4",
+	"File 5",
+	"File 6",
+	"File 7",
+	"File 8",
+	"File 9",
+	"File 1000",
+	"File 1123123",
+	"Dir 1",
+	"Dir 2",
+	"File 1",
+	"File 2",
+	"File 3",
+	"File 4",
+	"File 5",
+	"File 6",
+	"File 7",
+	"File 8",
+	"File 9",
+	"File 1000",
+	"File 1123123",
 	"File 1",
 	"File 2",
 	"File 3",
@@ -87,7 +124,7 @@ void draw_selection(int selection, int scroll) {
 	display_update();
 }
 
-void app_init() {
+static void app_init(void) {
 	display_init();
     backlight_init();
     keypad_init();
@@ -96,7 +133,7 @@ void app_init() {
 	// TODO: Setup sdcard and display error message on failure
 }
 
-void app_shutdown() {
+static void app_shutdown(void) {
 	display_poweroff();
 	reboot_to_firmware();
 }
@@ -132,24 +169,26 @@ app_main(void)
 			{
 				switch(event.keypad.pressed) {
 				case KEYPAD_UP:
-					printf("UP!\n");
-					if(--scroll < 0) {
-						scroll = 0;
+					if(--selection < 0) {
+						selection = 0;
+					}
+					if (selection - scroll < 0) {
+						scroll--;
 					}
 					draw_selection(selection, scroll);
 					break;
 				case KEYPAD_DOWN:
-					printf("DOWN!\n");
-					if(++scroll > ARRAY_LENGTH(entries)-1) {
-						scroll = ARRAY_LENGTH(entries)-1;
+					if (++selection > ARRAY_LENGTH(entries)-1) {
+						selection = ARRAY_LENGTH(entries)-1;
+					}
+					if (selection - scroll > (max_lines-1)) {
+						scroll++;
 					}
 					draw_selection(selection, scroll);
 					break;
 				case KEYPAD_RIGHT:
-					printf("RIGHT!\n");
 					break;
 				case KEYPAD_LEFT:
-					printf("LEFT!\n");
 					break;
 				case KEYPAD_MENU:
 					quit = true;

@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "gbuf.h": "c",
+        "graphics.h": "c",
+        "display.h": "c",
+        "stdbool.h": "c",
+        "keypad.h": "c",
+        "event.h": "c",
+        "stdint.h": "c",
+        "stddef.h": "c",
+        "sdl.h": "c",
+        "opensans_regular_11x12.h": "c",
+        "esp_system.h": "c",
+        "esp_partition.h": "c",
+        "system.h": "c",
+        "backlight.h": "c",
+        "audio.h": "c"
+    }
+}

@@ -39,23 +39,31 @@ No managing, just browsing the FS.
 
 - [X] Enable all warnings in simulation too
 
-- [ ] Odroid API Work
+- [x] Setup vscode properly
+	- [x] include paths
+	- [x] Makefile support
+	- [x] building + debugging simulation
+	- [x] building odroid go version?
+
+- [x] Figure out how to scroll many entries
+
+- [x] Create needed api overview for fs, draft program flow
+	- [x] Look at rover, nnn, noice and 3DShell for reference
+
+- [ ] file_ops.c: Main file browsing logic
+	- [ ] Entry/State structs
+	- [ ] ls()
+- [ ] ui/ui.c: Drawing logic
+	- [ ] draw_entries(Entry**, size_t n_entries)
+- [ ] file_browser.c: Uses file_ops and ui
+
+- [ ] Minimal sdkconfig and fw/app size
+
+## Later
+
+- [ ] Odroid API Work?
 	- [X] endianess as bool
 	- [ ] Better error handling
 	- [ ] Simulation
 	- [ ] Docs?
 
-- [ ] Setup vscode properly
-	- [x] include paths
-	- [ ] Makefile support
-	- [ ] building + debugging simulation
-	- [ ] building odroid go version?
-
-- [ ] Create needed api overview for fs, draft program flow
-	- [ ] Look at rover, nnn, noice and 3DShell for reference
-
-- [ ] Implement GUI List with scrolling and single line selection
-	- [ ] List == Array?
-	- [ ] draw_list(gbuf, selection) ...
-
-- [ ] Minimal sdkconfig and fw/app size

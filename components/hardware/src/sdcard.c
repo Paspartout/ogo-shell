@@ -12,7 +12,7 @@
 
 static sdmmc_card_t *sdcard = NULL;
 
-esp_err_t sdcard_init(const char *mount_path)
+int sdcard_init(const char *mount_path)
 {
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
     host.slot = HSPI_HOST;
@@ -31,7 +31,7 @@ esp_err_t sdcard_init(const char *mount_path)
     return esp_vfs_fat_sdmmc_mount(mount_path, &host, &slot_config, &mount_config, &sdcard);
 }
 
-esp_err_t sdcard_deinit()
+int sdcard_deinit()
 {
     if (!sdcard) {
         return ESP_FAIL;
