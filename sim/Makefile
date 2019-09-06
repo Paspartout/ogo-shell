@@ -1,11 +1,13 @@
-CFLAGS := -I ../components/hardware/include -I ../components/graphics -I ../main `sdl2-config --cflags` -O1 -g -DSIM=1 -Wall -Werror
+CFLAGS := -I ../components/hardware/include -I ../components/graphics -I ../main/include `sdl2-config --cflags` -O0 -g -DSIM=1 -Wall
 LDLIBS := -lSDL2
 
 # TODO: Header dependencies
 
 TARGET := ogo-fm
 
-SRC := ../main/main.o \
+SRC := ../main/src/main.o \
+	../main/src/file_ops.o \
+	../main/src/file_browser.o \
 	../sim/hardware/display.o \
 	../sim/hardware/event.o \
 	../sim/hardware/keypad.o \

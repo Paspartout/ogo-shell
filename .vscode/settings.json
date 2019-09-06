@@ -14,6 +14,13 @@
         "esp_partition.h": "c",
         "system.h": "c",
         "backlight.h": "c",
-        "audio.h": "c"
+        "audio.h": "c",
+        "string.h": "c",
+        "types.h": "c",
+        "stat.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "errno.h": "c",
+        "dirent.h": "c"
     }
 }

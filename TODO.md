@@ -17,7 +17,7 @@ No managing, just browsing the FS.
 - A: Open selected file/
 - B: Go up a directory
 - MENU: Go back to firmware
-- SELECT: Display file details
+- START: Display file details
 
 #### Display/Output
 
@@ -50,16 +50,31 @@ No managing, just browsing the FS.
 - [x] Create needed api overview for fs, draft program flow
 	- [x] Look at rover, nnn, noice and 3DShell for reference
 
-- [ ] file_ops.c: Main file browsing logic
-	- [ ] Entry/State structs
-	- [ ] ls()
-- [ ] ui/ui.c: Drawing logic
-	- [ ] draw_entries(Entry**, size_t n_entries)
-- [ ] file_browser.c: Uses file_ops and ui
+- [x] file_ops.c: Main file browsing logic
+	- [x] Entry/State structs
+	- [x] ls()
+
+- [x] file_browser.c: Uses file_ops and ui
+
+- [x] Fix cdup
+- [x] clear old entries on cding
+- [x] show message on empty folders
+- [x] Show current path somewhere
+- [x] Show error messages as dialog
+- [x] Show filesize?
+
+- [ ] Commit
+- [ ] Cleanup
+- [ ] Check for memory leaks
+- [ ] Deploy test on ogo
+	- [ ] Initialize sdcard
+	- [ ] Larger stacksize
 
 - [ ] Minimal sdkconfig and fw/app size
 
 ## Later
+
+- [ ] Remember old selection_pos when going back
 
 - [ ] Odroid API Work?
 	- [X] endianess as bool

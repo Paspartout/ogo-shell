@@ -122,8 +122,9 @@ tf_metrics_t tf_get_str_metrics(tf_t *tf, const char *s)
 
 short tf_draw_glyph(gbuf_t *g, tf_t *tf, char c, point_t p)
 {
-    assert(c >= tf->font->first);
-    assert(c <= tf->font->last);
+    if (c < tf->font->first || c > tf->font->last) {
+        c = '?';
+    }
 
     short width = tf->font->widths ? tf->font->widths[c - tf->font->first] : tf->font->width;
 
