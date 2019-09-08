@@ -3,21 +3,19 @@
 
 #include <display.h>
 
-static SDL_Window* window = NULL;
-static SDL_Renderer* renderer = NULL;
-static SDL_Texture* canvas = NULL;
+static SDL_Window *window = NULL;
+static SDL_Renderer *renderer = NULL;
+static SDL_Texture *canvas = NULL;
 
 // TODO: Refactor odroid go library to also return int?
-static int
-display_init2(void)
+static int display_init2(void)
 {
-	if ( SDL_Init(SDL_INIT_VIDEO) < 0) {
-			fprintf(stderr, "error initializing SDL: %s\n", SDL_GetError());
-			return -1;
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		fprintf(stderr, "error initializing SDL: %s\n", SDL_GetError());
+		return -1;
 	}
-	window = SDL_CreateWindow("ogo-fm", 
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			DISPLAY_WIDTH, DISPLAY_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	window = SDL_CreateWindow("ogo-fm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, DISPLAY_WIDTH, DISPLAY_HEIGHT,
+				  SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if (window == NULL) {
 		fprintf(stderr, "error creating SDL window: %s\n", SDL_GetError());
 		return -1;
@@ -28,23 +26,17 @@ display_init2(void)
 		return -1;
 	}
 	// TODO: Not sure if this works with RGB565
-	canvas = SDL_CreateTexture(renderer, 
-			SDL_PIXELFORMAT_RGB565,
-			SDL_TEXTUREACCESS_STREAMING,
-			DISPLAY_WIDTH, DISPLAY_HEIGHT);
+	canvas = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 	SDL_RenderSetLogicalSize(renderer, DISPLAY_WIDTH, DISPLAY_HEIGHT);
 	fb = gbuf_new(DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, false);
 	return 0;
 }
 
-void
-display_init(void)
-{
-	display_init2();
-}
+void display_init(void) { display_init2(); }
 
-void display_poweroff(void) {
+void display_poweroff(void)
+{
 	gbuf_free(fb);
 	SDL_DestroyTexture(canvas);
 	SDL_DestroyRenderer(renderer);
@@ -52,13 +44,15 @@ void display_poweroff(void) {
 	SDL_Quit();
 }
 
-void display_clear(uint16_t color) {
+void display_clear(uint16_t color)
+{
 	// TODO: Clear canvas
 	display_update();
 }
 
 // Copy gbuf to SDL canvas and update screen
-void display_update(void) {
+void display_update(void)
+{
 	int pitch;
 	void *pixels;
 	SDL_LockTexture(canvas, NULL, &pixels, &pitch);
@@ -68,10 +62,10 @@ void display_update(void) {
 	SDL_RenderPresent(renderer);
 }
 
-void display_update_rect(rect_t r) {
+void display_update_rect(rect_t r)
+{
 	// TODO: Simulate or visualize Partial update?
 	display_update();
 }
 
-void display_drain() {
-}
+void display_drain() {}

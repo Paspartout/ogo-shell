@@ -4,7 +4,7 @@
 #
 
 PROJECT_NAME := ogo-fm
-VERSION := 0.0.0
+VERSION := 0.1.0
 
 include $(IDF_PATH)/make/project.mk
 

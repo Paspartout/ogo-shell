@@ -1,15 +1,15 @@
 #pragma once
 
-#include <sys/types.h>
 #include <dirent.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 /** Information associated to each directory entry */
 typedef struct Entry {
-    char *name;  /** File name */
-    off_t size;  /** File size in bytes? */
-    mode_t mode; /** Access permissions? */
-    time_t mtime; /** Modifictaion time. */
+	char *name;   /** File name */
+	off_t size;   /** File size in bytes? */
+	mode_t mode;  /** Access permissions? */
+	time_t mtime; /** Modifictaion time. */
 } Entry;
 
 /** List all entries of given cwd without fetching file properties. */

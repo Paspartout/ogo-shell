@@ -1,5 +1,3 @@
 #include <keypad.h>
 
-void keypad_init(void) {
-
-}
+void keypad_init(void) {}

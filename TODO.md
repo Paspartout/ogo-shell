@@ -73,11 +73,12 @@ No managing, just browsing the FS.
 - [x] Show details on A and Start
 - [x] Fix all warnings
 - [x] Minimal sdkconfig and fw/app size
-- [ ] Format code
+- [x] Format code
 
-- [ ] Commit and tag v0.1
+- [x] Commit and tag v0.1
 
-## v0.2 - Hacky music playing capabilities
+v0.2 - Hacky music playing capabilities
+---------------------------------------
 
 - [ ] audio.c
 	- [ ] Understand
@@ -93,13 +94,16 @@ No managing, just browsing the FS.
 - [ ] audio_player.c:
 	- [ ] open(file_path)
 
+- [ ] Backlight control
 - [ ] Battery meter in top right corner with %
 - [ ] Rename to ogo-shell
 
-## v0.3 - Polish and file management
+v0.3 - Polish and file management
+---------------------------------
 
 - [ ] Icons instead of f and d
 - [ ] Remember old selection_pos when going back
+- [ ] Wrap around selection if hitting boundaries?
 
 - [ ] Bigger Cleanup/Refactor
 	- [ ] Menu as ui_list?
@@ -108,14 +112,15 @@ No managing, just browsing the FS.
 
 - [ ] START -> Dialog
 	- [ ] Details
+- [ ] Understand and correct partitions.csv
 
-## Later
+
+Future versions
+---------------
 
 - [ ] Show sdcard statistics using [getfree](http://elm-chan.org/fsw/ff/doc/getfree.html)
 
 - [ ] Odroid API Work?
-	- [X] endianess as bool
 	- [ ] Better error handling
 	- [ ] Simulation
 	- [ ] Docs?
-
