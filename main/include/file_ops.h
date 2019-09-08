@@ -12,6 +12,14 @@ typedef struct Entry {
 	time_t mtime; /** Modifictaion time. */
 } Entry;
 
+/** FileType enumeration used to open files */
+typedef enum FileType {
+	FileTypeNone,
+	FileTypeMP3,
+	FileTypeOGG,
+} FileType;
+
+
 /** List all entries of given cwd without fetching file properties. */
 int fops_list_dir(Entry **entries, const char *cwd);
 
@@ -21,5 +29,8 @@ int fops_stat_entries(Entry *entries, const size_t n_entries, const char *cwd);
 /** Fetch status information for a single entry. */
 int fops_stat_entry(Entry *entries, const char *cwd);
 
-/** Free entries. **/
+/** Free entries. */
 void fops_free_entries(Entry **entries, int n_entires);
+
+/** Given a filename  */
+FileType fops_determine_filetype(const char* filename);

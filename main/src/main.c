@@ -71,6 +71,7 @@ static int app_init(void)
 {
 	display_init();
 	backlight_init();
+	backlight_percentage_set(50);
 	keypad_init();
 	event_init();
 

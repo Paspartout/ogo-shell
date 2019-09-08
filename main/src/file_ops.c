@@ -122,3 +122,20 @@ void fops_free_entries(Entry **entries, int n_entires)
 		free(*entries);
 	*entries = NULL;
 }
+
+FileType fops_determine_filetype(const char *filename)
+{
+	// TODO: Use regex or something else?
+	size_t len = strlen(filename);
+	if (len < 4) {
+		return FileTypeNone;
+	}
+
+	if (!strncasecmp("mp3", &filename[len-3], 3)) {
+		return FileTypeMP3;
+	} else if (!strncasecmp("ogg", &filename[len-3], 3)) {
+		return FileTypeOGG;
+	}
+	return FileTypeNone;
+}
+

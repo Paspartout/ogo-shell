@@ -4,7 +4,7 @@
 #
 
 PROJECT_NAME := ogo-fm
-VERSION := 0.1.0
+VERSION := 0.2.0
 
 include $(IDF_PATH)/make/project.mk
 
@@ -17,5 +17,5 @@ dist: $(APP_FW)
 
 $(APP_FW): $(APP_BIN)
 	@echo MKFW $@
-	@$(MKFW) "$(PROJECT_NAME)($(VERSION))" media/tile.raw 0 16 262144 "$(PROJECT_NAME)" $^
+	@$(MKFW) "$(PROJECT_NAME)($(VERSION))" media/tile.raw 0 16 524288 "$(PROJECT_NAME)" $^
 	@mv firmware.fw $@

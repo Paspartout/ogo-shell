@@ -15,6 +15,8 @@
 #include <keypad.h>
 #include <tf.h>
 
+#include <audio_player.h>
+
 #define COLOR_GRAY 0x4A69
 #define COLOR_ORANGE 0xDB60
 
@@ -211,7 +213,7 @@ static void ui_draw_details(Entry *entry, const char *cwd)
 	const int line_height = 16;
 	int y = 34;
 	tf_draw_str(fb, font_white, "Details", (point_t){.x = 3, .y = y});
-	y += line_height;
+	y += line_height * 2;
 	// Full file name
 	// TODO: Figure out wordwrapping or scrolling for long filenames
 	snprintf(str_buf, 300, "Name: %s", entry->name);
@@ -228,8 +230,8 @@ static void ui_draw_details(Entry *entry, const char *cwd)
 	snprintf(str_buf, 256, "Modification time: %s", filesize_buf);
 	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
-	// Permissions?
-	mode_t permissions = entry->mode & 0777;
+	// Permissions
+	const mode_t permissions = entry->mode & 0777;
 	snprintf(str_buf, 256, "Permissions: %o", permissions);
 	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
 	// TODO Later: filetype using libmagic?
@@ -241,8 +243,6 @@ static void ui_draw_details(Entry *entry, const char *cwd)
 		if (event.type == EVENT_TYPE_KEYPAD && event.keypad.pressed)
 			break;
 	}
-
-	ui_draw_browser();
 }
 
 static void browser_init(const char *cwd)
@@ -324,12 +324,19 @@ static int browser_cd_up(void)
 	return browser_cd(new_cwd);
 }
 
+
+#ifdef SIM
+#define START_FOLDER "/home/paspartout/mus"
+#else
+#define START_FOLDER "/sdcard/mus"
+#endif
+
 int file_browser(void)
 {
 	bool quit = false;
 	event_t event;
 
-	browser_init("/sdcard");
+	browser_init(START_FOLDER);
 	ui_init();
 	browser.n_entries = fops_list_dir(&browser.cwd_entries, browser.cwd);
 	if (browser.n_entries < 0) {
@@ -370,9 +377,14 @@ int file_browser(void)
 				if (S_ISDIR(entry->mode)) {
 					browser_cd_down(entry->name);
 				} else {
-					printf("Trying to open file: %s\n", entry->name);
-					ui_draw_details(entry, browser.cwd);
-					// TODO: File handlers
+					// TODO: Proper File handlers
+					const FileType ftype = fops_determine_filetype(entry->name);
+					if (ftype == FileTypeMP3 || ftype == FileTypeOGG) {
+						audio_player(browser.cwd_entries, browser.selection, browser.cwd);
+					} else {
+						ui_draw_details(entry, browser.cwd);
+					}
+					ui_draw_browser();
 				}
 			} break;
 			case KEYPAD_B:

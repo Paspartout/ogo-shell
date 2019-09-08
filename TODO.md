@@ -77,31 +77,57 @@ No managing, just browsing the FS.
 
 - [x] Commit and tag v0.1
 
-v0.2 - Hacky music playing capabilities
+v0.2 - Basic music playing capabilities
 ---------------------------------------
 
-- [ ] audio.c
-	- [ ] Understand
-	- [ ] Tidy up
-	- [ ] Simulate using SDL?
-	- [ ] Add DAC capabilities
+### Audio Player Dialog
 
-- [ ] audio_dec component?
-	- [ ] stb_vorbis
-	- [ ] dr_mp3
+#### Input:
+
+- A: Play/Pause
+- B: Close Song, Go back(Later: Continue playing in the background)
+- START: Switch DAC/Speaker?
+- SELECT: Toggle display backlight for longer battery life?
+- VOLUME: Cycle volume
+- RIGHT: Next Song
+- LEFT: Previous Song
+
+- [ ] audio.c
+	- [x] Tidy up
+	- [x] Add DAC capabilities
+	- [ ] Understand differential output
+	- [ ] Simulate audio using SDL
+	- [ ] Even more tyding
+
+- [ ] acodecs component: component containing all decoders
+	- [x] stb_vorbis
+	- [x] dr_mp3
 	- [ ] dr_wav
+	- [ ] dr_flac
+	- [ ] mod, xm, it?
 
 - [ ] audio_player.c:
-	- [ ] open(file_path)
+	- [ ] fix audio_shutdown leaves speaker making noise
+	- [ ] display/sdcard solve spi_bus race condition
+	- [ ] mp3 support
 
 - [ ] Backlight control
 - [ ] Battery meter in top right corner with %
 - [ ] Rename to ogo-shell
+- [ ] Release?
+	- [ ] Update README.md
+		- [ ] Instructions
+		- [ ] Screenshots
 
 v0.3 - Polish and file management
 ---------------------------------
 
+- [ ] Figure out a plan for error handling that allows displaying on lcd
 - [ ] Icons instead of f and d
+	- [ ] Create icon font
+		- [ ] File, Directory, Music File
+		- [ ] Battery, Headphones, Speaker, Settings, ...
+		- [ ] Buttons (A) (B) for Help texts
 - [ ] Remember old selection_pos when going back
 - [ ] Wrap around selection if hitting boundaries?
 
@@ -112,6 +138,8 @@ v0.3 - Polish and file management
 
 - [ ] START -> Dialog
 	- [ ] Details
+- [ ] SELECT -> Select/Mark files
+	- [ ] Show selection as different background color
 - [ ] Understand and correct partitions.csv
 
 
