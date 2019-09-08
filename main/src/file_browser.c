@@ -2,6 +2,7 @@
 #include <limits.h>     /* PATH_MAX */
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <display.h>
 
@@ -14,6 +15,8 @@
 #include <keypad.h>
 #include <file_ops.h>
 
+#define COLOR_GRAY 0x4A69
+#define COLOR_ORANGE 0xDB60 
 
 /* Global state. */
 static struct FileBrowser {
@@ -22,17 +25,18 @@ static struct FileBrowser {
     int n_entries;
     int selection;
     int scroll;
+    bool stat_enabled;
 } browser;
 
 /** Number of entries that can be displayed at once. */
-static const int MAX_WIN_ENTRIES = 12;
+static const int MAX_WIN_ENTRIES = 13;
 
 static tf_t *font_black;
 static tf_t *font_white;
 
 static void ui_init(void) {
-    font_black = tf_new(&font_OpenSans_Regular_11X12, 0x0000, 0, TF_ALIGN_CENTER);
-    font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_ALIGN_CENTER);
+    font_black = tf_new(&font_OpenSans_Regular_11X12, 0x0000, 0, TF_WORDWRAP);
+    font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
 }
 
 static void ui_free(void) {
@@ -54,13 +58,14 @@ static void fruncate_path(char* dst, const char* src, const size_t len) {
 }
 
 static void ui_draw_pathbar(const char *path, int selection, int n_entries) {
-    fill_rectangle(fb, (rect_t) {.x = 0, .y = 16, .width=DISPLAY_WIDTH, .height=16}, 0xFFFF);
+    fill_rectangle(fb, (rect_t) {.x = 0, .y = 16, .width=DISPLAY_WIDTH, .height=15}, 0xFFFF);
 
-    // Eventually truncate path
-    char *path_str;
+    // Draw path
+    const char *path_str;
     const int max_path_len = 40;
     char path_buf[max_path_len + 1];
     const size_t path_len = strlen(path);
+    // Eventually truncate path
     if (path_len > max_path_len) {
         fruncate_path(path_buf, path, max_path_len);
         path_str = path_buf;
@@ -68,34 +73,46 @@ static void ui_draw_pathbar(const char *path, int selection, int n_entries) {
         // use path directly
         path_str = path;
     }
-
     tf_draw_str(fb, font_black, path_str, (point_t){.x = 3, .y = 18});
 
-    char selection_str[16];
-    snprintf(selection_str, 16, "%d/%d", selection, n_entries);
-    const tf_metrics_t m = tf_get_str_metrics(font_black, selection_str);
-    tf_draw_str(fb, font_black, selection_str, (point_t){.x = DISPLAY_WIDTH-m.width - 3, .y = 18});
+    // Draw selection and number of entries
+    if (n_entries > 0) {
+        char selection_str[16];
+        snprintf(selection_str, 16, "%d/%d", selection, n_entries);
+        const tf_metrics_t m = tf_get_str_metrics(font_black, selection_str);
+        tf_draw_str(fb, font_black, selection_str, (point_t){.x = DISPLAY_WIDTH-m.width - 3, .y = 18});
+    }
 }
 
-static void ui_draw_browser(void) {
-    // printf("sel: %d, scroll: %d\n", browser.selection, browser.scroll);
 
+// Print human readable representation of file size into dst
+int sprint_human_size(char* dst, size_t strsize, off_t size) {
+    char *suffix, *suffixes = "BKMGTPEZY";
+    off_t human_size = size * 10;
+    for (suffix = suffixes; human_size >= 10240; suffix++)
+        human_size = (human_size + 512) / 1024;
+    return snprintf(dst, strsize, "%d.%d %c", (int)human_size/10, (int)human_size % 10, *suffix);
+}
+
+
+static void ui_draw_browser(void) {
     // Draw Path
     ui_draw_pathbar(browser.cwd, browser.selection+1, browser.n_entries);
 
-    // Draw entries
+    // Show message if directory is empty
     if (browser.n_entries == 0) {
         browser.selection = 0;
-        fill_rectangle(fb, (rect_t) {.x = 0, .y = 33, .width=DISPLAY_WIDTH, .height=DISPLAY_HEIGHT-33}, 0x0000);
+        fill_rectangle(fb, (rect_t) {.x = 0, .y = 32, .width=DISPLAY_WIDTH, .height=DISPLAY_HEIGHT-32}, 0x0000);
         tf_draw_str(fb, font_white, "This directory is empty", (point_t){.x = DISPLAY_WIDTH/2-75, .y = DISPLAY_HEIGHT/2});
         display_update();
         return;
     }
 
+    // Draw entries
     for (int i = browser.scroll; i < browser.scroll+MAX_WIN_ENTRIES; i++)
     {
 		const int r = (i - browser. scroll); // window row in [0, 13]
-        const int y_start = 33; // Be careful to also change MAX_WIN_ENTRIES you fool
+        const int y_start = 32; // Be careful to also change MAX_WIN_ENTRIES you fool
         const int line_height = 16;
         const int rect_y = y_start + r * 16;
 
@@ -111,25 +128,32 @@ static void ui_draw_browser(void) {
         // Draw filename
         const Entry* entry = &browser.cwd_entries[i];
         char item_str[64];
+        char fname_buf[41];
+        char *filename;
+        if (strlen(entry->name) > 40) {
+            fruncate_path(fname_buf, entry->name, 40);
+            filename = fname_buf;
+        } else {
+            filename = entry->name;
+        }
         snprintf(item_str, 64, "%c - %s",
             (S_ISDIR(entry->mode)) ? 'd' : 'f',
-            entry->name
+            filename
             );
         tf_draw_str(fb, font_white, item_str, (point_t){.x = 2, .y = rect_y + 2 });
         
         // Draw file size
-        char filesize_buf[32];
-        char *suffix, *suffixes = "BKMGTPEZY";
-        off_t human_size = entry->size * 10;
-        for (suffix = suffixes; human_size >= 10240; suffix++)
-            human_size = (human_size + 512) / 1024;
-        snprintf(filesize_buf, 32, "%d.%d %c", (int)human_size/10, (int)human_size % 10, *suffix);
-        const tf_metrics_t m = tf_get_str_metrics(font_white, filesize_buf);
-        tf_draw_str(fb, font_white, filesize_buf, (point_t){.x = DISPLAY_WIDTH-m.width - 3, .y = rect_y + 2});
+        if (browser.stat_enabled) {
+            char filesize_buf[32];
+            sprint_human_size(filesize_buf, 32, entry->size);
+            const tf_metrics_t m = tf_get_str_metrics(font_white, filesize_buf);
+            tf_draw_str(fb, font_white, filesize_buf, (point_t){.x = DISPLAY_WIDTH-m.width - 3, .y = rect_y + 2});
+        }
     }
     
     display_update();
 }
+
 
 static void browser_scroll(int amount) {
     if (amount == 0) {
@@ -158,6 +182,8 @@ static void browser_scroll(int amount) {
     }
 }
 
+
+// TODO: printf like behaviour would be nice for detailed error messages
 static void ui_message_error(const char *msg) {
     // TODO: Display error on display
     const int ypos = 104;
@@ -169,6 +195,54 @@ static void ui_message_error(const char *msg) {
     event_t event;
     wait_event(&event);
     while(event.type != EVENT_TYPE_KEYPAD) {};
+
+}
+
+static void ui_draw_details(Entry *entry, const char* cwd) {
+    // Try to retrieve file stats
+    if (fops_stat_entry(entry, cwd) == -1) {
+        ui_message_error("Could not get file status");
+        return;
+    }
+
+    char str_buf[300];
+    char filesize_buf[32];
+    fill_rectangle(fb, (rect_t) {.x = 0, .y = 32, .width=DISPLAY_WIDTH, .height=DISPLAY_HEIGHT-32}, COLOR_GRAY);
+    const int line_height = 16;
+    int y = 34;
+    tf_draw_str(fb, font_white, "Details", (point_t) {.x = 3, .y = y});
+    y += line_height;
+    // Full file name
+    // TODO: Figure out wordwrapping or scrolling for long filenames
+    snprintf(str_buf, 300, "Name: %s", entry->name);
+    tf_draw_str(fb, font_white, str_buf, (point_t) {.x = 3, .y = y});
+    y += line_height * 2;
+    // File size
+    sprint_human_size(filesize_buf, 32, entry->size);
+    snprintf(str_buf, 256, "Size: %s(%ld Bytes)", filesize_buf, entry->size);
+    tf_draw_str(fb, font_white, str_buf, (point_t) {.x = 3, .y = y});
+    y += line_height;
+    // Modification time
+    sprint_human_size(filesize_buf, 32, entry->size);
+    ctime_r(&entry->mtime, filesize_buf);
+    snprintf(str_buf, 256, "Modification time: %s", filesize_buf);
+    tf_draw_str(fb, font_white, str_buf, (point_t) {.x = 3, .y = y});
+    y += line_height;
+    // Permissions?
+    mode_t permissions = entry->mode & 0777;
+    snprintf(str_buf, 256, "Permissions: %o", permissions);
+    tf_draw_str(fb, font_white, str_buf, (point_t) {.x = 3, .y = y});
+    // TODO Later: filetype using libmagic?
+
+    display_update();
+    event_t event;
+    for(;;) {
+        wait_event(&event);
+        if (event.type == EVENT_TYPE_KEYPAD && event.keypad.pressed)
+            break;
+    }
+
+    ui_draw_browser();
 }
 
 static void browser_init(const char* cwd) {
@@ -176,6 +250,7 @@ static void browser_init(const char* cwd) {
     browser.cwd_entries = NULL;
     browser.selection = 0;
     browser.scroll = 0;
+    browser.stat_enabled = false;
 }
 
 static int browser_cd(const char* new_cwd) {
@@ -194,6 +269,9 @@ static int browser_cd(const char* new_cwd) {
     browser.scroll = 0;
     browser.cwd_entries = new_entries;
     strncpy(browser.cwd, new_cwd, PATH_MAX);
+
+    if (browser.stat_enabled)
+        fops_stat_entries(browser.cwd_entries, browser.n_entries, browser.cwd);
 
     ui_draw_browser();
     return 0;
@@ -246,9 +324,12 @@ int file_browser(void) {
 	bool quit = false;
 	event_t event;
 
-    browser_init("/home/paspartout");
+    browser_init("/sdcard");
     ui_init();
     browser.n_entries = fops_list_dir(&browser.cwd_entries, browser.cwd);
+    if (browser.n_entries < 0) {
+        browser.n_entries = 0;
+    }
 
     ui_draw_browser();
 
@@ -278,11 +359,15 @@ int file_browser(void) {
                     ui_draw_browser();
 					break;
 				case KEYPAD_A: {
-                    const Entry* entry = &browser.cwd_entries[browser.selection];
+                    if (browser.n_entries <= 0) {
+                        continue;
+                    }
+                    Entry* entry = &browser.cwd_entries[browser.selection];
                     if (S_ISDIR(entry->mode)) {
                         browser_cd_down(entry->name);
                     } else {
                         printf("Trying to open file: %s\n", entry->name);
+                        ui_draw_details(entry, browser.cwd);
                         // TODO: File handlers
                     }
                 }
@@ -294,7 +379,18 @@ int file_browser(void) {
                     // TODO: Help Window + Quit Option
 					quit = true;
 					break;
-				}
+				case KEYPAD_START:
+                    ui_draw_details(&browser.cwd_entries[browser.selection], browser.cwd);
+					break;
+				case KEYPAD_SELECT:
+                    // Toggle detailed information mode
+                    browser.stat_enabled = !browser.stat_enabled;
+                    if (browser.stat_enabled) {
+                        fops_stat_entries(browser.cwd_entries, browser.n_entries, browser.cwd);
+                    }
+                    ui_draw_browser();
+					break;
+				} // switch(event.keypad.pressed)
             }
 				break;
 			default:

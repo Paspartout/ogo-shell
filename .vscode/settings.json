@@ -21,6 +21,10 @@
         "stdlib.h": "c",
         "stdio.h": "c",
         "errno.h": "c",
-        "dirent.h": "c"
+        "dirent.h": "c",
+        "sdcard.h": "c",
+        "file_ops.h": "c",
+        "unistd.h": "c",
+        "limits.h": "c"
     }
 }

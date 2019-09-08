@@ -14,7 +14,7 @@ No managing, just browsing the FS.
 - DOWN: Menu go down
 - RIGHT: Next Page
 - LEFT: Previous Page
-- A: Open selected file/
+- A: Go into directory/Show file details
 - B: Go up a directory
 - MENU: Go back to firmware
 - START: Display file details
@@ -63,18 +63,55 @@ No managing, just browsing the FS.
 - [x] Show error messages as dialog
 - [x] Show filesize?
 
-- [ ] Commit
-- [ ] Cleanup
-- [ ] Check for memory leaks
-- [ ] Deploy test on ogo
-	- [ ] Initialize sdcard
-	- [ ] Larger stacksize
+- [x] Commit
+- [x] Check for memory leaks and consumption
+- [x] Deploy test on ogo
+	- [x] Initialize sdcard
+	- [x] Larger stacksize
 
-- [ ] Minimal sdkconfig and fw/app size
+- [x] Only stat using start
+- [x] Show details on A and Start
+- [x] Fix all warnings
+- [x] Minimal sdkconfig and fw/app size
+- [ ] Format code
+
+- [ ] Commit and tag v0.1
+
+## v0.2 - Hacky music playing capabilities
+
+- [ ] audio.c
+	- [ ] Understand
+	- [ ] Tidy up
+	- [ ] Simulate using SDL?
+	- [ ] Add DAC capabilities
+
+- [ ] audio_dec component?
+	- [ ] stb_vorbis
+	- [ ] dr_mp3
+	- [ ] dr_wav
+
+- [ ] audio_player.c:
+	- [ ] open(file_path)
+
+- [ ] Battery meter in top right corner with %
+- [ ] Rename to ogo-shell
+
+## v0.3 - Polish and file management
+
+- [ ] Icons instead of f and d
+- [ ] Remember old selection_pos when going back
+
+- [ ] Bigger Cleanup/Refactor
+	- [ ] Menu as ui_list?
+	- [ ] Dialogs?
+	- [ ] Smaller but static functions
+
+- [ ] START -> Dialog
+	- [ ] Details
 
 ## Later
 
-- [ ] Remember old selection_pos when going back
+- [ ] Show sdcard statistics using [getfree](http://elm-chan.org/fsw/ff/doc/getfree.html)
 
 - [ ] Odroid API Work?
 	- [X] endianess as bool

@@ -13,6 +13,7 @@ SRC := ../main/src/main.o \
 	../sim/hardware/keypad.o \
 	../sim/hardware/backlight.o \
 	../sim/hardware/system.o \
+	../sim/hardware/sdcard.o \
 	../components/hardware/src/gbuf.o \
 	../components/graphics/graphics.o \
 	../components/graphics/tf.o \

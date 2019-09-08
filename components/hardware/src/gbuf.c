@@ -5,7 +5,7 @@
 
 gbuf_t *gbuf_new(uint16_t width, uint16_t height, uint16_t bytes_per_pixel, bool big_endian)
 {
-    gbuf_t *g = malloc(sizeof(gbuf_t) + width * height * bytes_per_pixel);
+    gbuf_t *g = calloc(1, sizeof(gbuf_t) + width * height * bytes_per_pixel);
     if (g == NULL) return NULL;
 
     g->width = width;
