@@ -84,7 +84,6 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 
 	chosen_output = output;
 	initialized = true;
-	audio_volume = 1.0f;
 	return 0;
 }
 
