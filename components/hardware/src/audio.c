@@ -1,6 +1,7 @@
 #include <freertos/FreeRTOS.h>
 #include <driver/i2s.h>
 #include <driver/rtc_io.h>
+#include <driver/dac.h>
 
 #include <stdio.h>
 
@@ -10,14 +11,18 @@
 #define AUDIO_IO_POSITIVE GPIO_NUM_26
 #define I2S_NUM I2S_NUM_0
 
-float audio_volume = 1.0f;
+float audio_volume = 0.5f;
 
 static bool initialized = false;
 static AudioOutput chosen_output = AudioOutputSpeaker;
 
-static int shutdown_amplifier() {
+static int shutdown_speaker() {
 	esp_err_t error;
-	const char *error_message = "Could not shutdown internal amp: %s\n";
+	const char *error_message = "Could not shutdown dac or amplifier amp: %s\n";
+	if ((error = i2s_set_dac_mode(I2S_DAC_CHANNEL_DISABLE)) != ESP_OK) {
+		fprintf(stderr, error_message, esp_err_to_name(error));
+		return -1;
+	}
 	if ((error = gpio_set_direction(AUDIO_IO_NEGATIVE, GPIO_MODE_OUTPUT)) != ESP_OK) {
 		fprintf(stderr, error_message, esp_err_to_name(error));
 		return -1;
@@ -74,7 +79,7 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 
 	// Disable interal amplifier when using DAC
 	if (output == AudioOutputDAC) {
-		shutdown_amplifier();
+		shutdown_speaker();
 	}
 
 	chosen_output = output;
@@ -95,7 +100,7 @@ int audio_shutdown(void) {
 		return -1;
 	}
 
-	shutdown_amplifier();
+	shutdown_speaker();
 	initialized = false;
 
 	return 0;
@@ -165,7 +170,6 @@ void audio_submit(short *buf, int n_frames)
 	}
 	if (audio_volume == 0.0f) {
 		for (int i = 0; i < n_frames; i += 2) {
-			// TODO: Not sure if this is right?
 			buf[i] = 0;
 			buf[i+1] = 0;
 		}

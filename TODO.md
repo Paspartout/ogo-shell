@@ -102,14 +102,14 @@ v0.2 - Basic music playing capabilities
 - [ ] acodecs component: component containing all decoders
 	- [x] stb_vorbis
 	- [x] dr_mp3
+	- [ ] mod, xm, it?
 	- [ ] dr_wav
 	- [ ] dr_flac
-	- [ ] mod, xm, it?
 
 - [ ] audio_player.c:
-	- [ ] fix audio_shutdown leaves speaker making noise
+	- [x] fix audio_shutdown leaves speaker making noise
+	- [x] mp3 support
 	- [ ] display/sdcard solve spi_bus race condition
-	- [ ] mp3 support
 
 - [ ] Backlight control
 - [ ] Battery meter in top right corner with %

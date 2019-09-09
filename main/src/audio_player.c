@@ -29,7 +29,7 @@
 // Player state
 static char* filename = NULL;
 static char filepath[PATH_MAX];
-static bool playing = false;
+static bool playing = true;
 static AudioOutput output = AudioOutputDAC;
 
 static bool backlight = true;
@@ -74,46 +74,81 @@ void audio_player_task(void *arg) {
     const char* fpath = (char*)arg;
     FileType ftype = fops_determine_filetype(fpath);
     printf("Opening file: %s, ftype: %d\n", fpath, ftype);
+    short audio_buf[4096];
+
     if (ftype == FileTypeOGG) {
         int error;
         stb_vorbis* vorbis;
         vorbis = stb_vorbis_open_filename(fpath, &error, NULL);
-
         stb_vorbis_info info = stb_vorbis_get_info(vorbis);
         audio_init(info.sample_rate, output);
-        audio_volume = 0.5f;
 
         PlayerCmd cmd;
         int n_frames = 0;
-        short audio_buf[4096];
-        bool playing = true;
+        playing = true;
         do {
+            // React on user control
             if (xQueueReceive(audio_cmd_queue, &cmd, 0) == pdTRUE) {
-                printf("Received cmd: %d\n", cmd);
                 if (cmd == PlayerCmdPause) {
                     playing = !playing;
                     if (playing) {
-                        audio_volume = 0.5f;
+                        audio_init(info.sample_rate, output);
                     } else {
-                        audio_volume = 0.0f;
+                        audio_shutdown();
                     }
                 } else if(cmd == PlayerCmdTerminate) {
                     break;
                 }
             }
+            // Play if not paused
             if (playing) {
                 n_frames = stb_vorbis_get_frame_short_interleaved(vorbis, info.channels, audio_buf, 4096);
                 audio_submit(audio_buf, n_frames);
             } else {
-                audio_submit(audio_buf, n_frames);
+                vTaskDelay(10 / portTICK_PERIOD_MS);
             }
         } while(n_frames > 0);
         stb_vorbis_close(vorbis);
+    } else if(ftype == FileTypeMP3) {
+        // TODO: Cleanup and merge with OGG
+        // Too tired for proper coding atm just wanna have mp3 support
+        int sample_rate = 0;
+        drmp3 mp3;
+        if (!drmp3_init_file(&mp3, fpath, NULL)) {
+            printf("Error opening mp3 file :/\n");
+        }
+        sample_rate = mp3.sampleRate;
+        audio_init(sample_rate, output);
+
+        PlayerCmd cmd;
+        int n_frames = 0;
+        playing = true;
+        do {
+            // React on user control
+            if (xQueueReceive(audio_cmd_queue, &cmd, 0) == pdTRUE) {
+                if (cmd == PlayerCmdPause) {
+                    playing = !playing;
+                    if (playing) {
+                        audio_init(sample_rate, output);
+                    } else {
+                        audio_shutdown();
+                    }
+                } else if(cmd == PlayerCmdTerminate) {
+                    break;
+                }
+            }
+            // Play if not paused
+            if (playing) {
+                n_frames = drmp3_read_pcm_frames_s16(&mp3, 2048, audio_buf);
+                audio_submit(audio_buf, n_frames);
+            } else {
+                vTaskDelay(10 / portTICK_PERIOD_MS);
+            }
+        } while(n_frames > 0);
+        drmp3_uninit(&mp3);
     }
 
-
     // TODO: Teardown
-    printf("Audio player shutdown...\n");
     audio_shutdown();
     for(;;) {
         vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -121,7 +156,7 @@ void audio_player_task(void *arg) {
 }
 
 void audio_player_start(void) {
-    if (xTaskCreate(audio_player_task, "player_task", 2*8192, filepath, 5, &audio_player_task_handle) != pdPASS) {
+    if (xTaskCreate(audio_player_task, "player_task", 9*8192, filepath, 5, &audio_player_task_handle) != pdPASS) {
         printf("Error creating task\n");
         return;
     }
@@ -131,6 +166,7 @@ void audio_player_start(void) {
 void audio_player_pause(void) {
     PlayerCmd term = PlayerCmdPause;
     xQueueSend(audio_cmd_queue, &term, 0);
+    vTaskDelay(100 / portTICK_PERIOD_MS); // TODO: Proper sync
 }
 
 void audio_player_terminate(void) {
@@ -150,8 +186,6 @@ static void handle_keypress(uint16_t keys, bool *quit)
     switch (keys) {
     case KEYPAD_A:
         // TODO: Pause/Play
-        playing = !playing;
-        //draw_player();
         #ifndef SIM
         audio_player_pause();
         #endif
@@ -165,7 +199,6 @@ static void handle_keypress(uint16_t keys, bool *quit)
             audio_volume_new = 1.0f;
         }
         audio_volume = audio_volume_new;
-        printf("audio volume: %f\n", audio_volume);
         // TODO: Vol up?
         break;
     case KEYPAD_DOWN:
@@ -174,7 +207,6 @@ static void handle_keypress(uint16_t keys, bool *quit)
             audio_volume_new = 0.0f;
         }
         audio_volume = audio_volume_new;
-        printf("audio volume: %f\n", audio_volume);
         // TODO: Vol down?
         break;
     case KEYPAD_RIGHT:
@@ -206,13 +238,14 @@ int audio_player(Entry* entries, int index, const char *cwd)
     filename = entries[index].name;
     snprintf(filepath, PATH_MAX, "%s/%s", cwd, filename);
     printf("Trying to open audio file: %s\n", filepath);
+
+	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
+    draw_player();
+
     #ifndef SIM
     audio_player_start();
     #endif
 
-	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
-    //draw_player();
-    
     bool quit = false;
     event_t event;
 	while (!quit) {
