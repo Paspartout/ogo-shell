@@ -15,7 +15,8 @@ SRC := ../main/src/main.o \
 	../sim/hardware/backlight.o \
 	../sim/hardware/system.o \
 	../sim/hardware/sdcard.o \
-	../components/acodecs/src/stb_vorbis.o \
+        ../sim/hardware/audio.o \
+        ../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \
 	../components/hardware/src/gbuf.o \
 	../components/graphics/graphics.o \
@@ -23,6 +24,8 @@ SRC := ../main/src/main.o \
 	../components/graphics/OpenSans_Regular_11X12.o
 
 OBJ := ${SRC:.c=.o}
+
+all: $(TARGET)
 
 $(TARGET): ${OBJ}
 	@echo LD $@

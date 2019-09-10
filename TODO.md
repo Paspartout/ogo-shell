@@ -95,8 +95,8 @@ v0.2 - Basic music playing capabilities
 - [ ] audio.c
 	- [x] Tidy up
 	- [x] Add DAC capabilities
-	- [ ] Understand differential output
-	- [ ] Simulate audio using SDL
+        - [ ] Simulate audio using SDL
+        - [ ] Understand differential output
 	- [ ] Even more tyding
 
 - [ ] acodecs component: component containing all decoders

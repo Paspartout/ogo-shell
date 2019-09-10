@@ -131,11 +131,10 @@ FileType fops_determine_filetype(const char *filename)
 		return FileTypeNone;
 	}
 
-	if (!strncasecmp("mp3", &filename[len-3], 3)) {
+	if (!strncasecmp("mp3", &filename[len - 3], 3)) {
 		return FileTypeMP3;
-	} else if (!strncasecmp("ogg", &filename[len-3], 3)) {
+	} else if (!strncasecmp("ogg", &filename[len - 3], 3)) {
 		return FileTypeOGG;
 	}
 	return FileTypeNone;
 }
-

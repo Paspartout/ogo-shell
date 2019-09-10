@@ -3,8 +3,8 @@
 extern float audio_volume;
 
 typedef enum AudioOutput {
-    AudioOutputSpeaker,
-    AudioOutputDAC,
+	AudioOutputSpeaker,
+	AudioOutputDAC,
 } AudioOutput;
 
 /** Initialize audio driver/i2s with given sample rate and output mode. */

@@ -324,7 +324,6 @@ static int browser_cd_up(void)
 	return browser_cd(new_cwd);
 }
 
-
 #ifdef SIM
 #define START_FOLDER "/home/paspartout/mus"
 #else

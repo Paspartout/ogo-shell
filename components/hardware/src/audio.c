@@ -16,7 +16,8 @@ float audio_volume = 0.5f;
 static bool initialized = false;
 static AudioOutput chosen_output = AudioOutputSpeaker;
 
-static int shutdown_speaker() {
+static int shutdown_speaker()
+{
 	esp_err_t error;
 	const char *error_message = "Could not shutdown dac or amplifier amp: %s\n";
 	if ((error = i2s_set_dac_mode(I2S_DAC_CHANNEL_DISABLE)) != ESP_OK) {
@@ -49,8 +50,7 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 	const i2s_comm_format_t commfmt_dac = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB;
 	const i2s_comm_format_t commfmt_speaker = I2S_COMM_FORMAT_I2S_MSB;
 
-	i2s_config_t i2s_config = {
-				   .mode = output == AudioOutputSpeaker ? mode_speaker : mode_dac,
+	i2s_config_t i2s_config = {.mode = output == AudioOutputSpeaker ? mode_speaker : mode_dac,
 				   .sample_rate = audio_sample_rate,
 				   .bits_per_sample = 16,
 				   .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
@@ -60,10 +60,10 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 				   .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
 				   .use_apll = output == AudioOutputDAC ? true : false};
 	const i2s_pin_config_t dac_pin_config = {
-		.bck_io_num = 4,
-		.ws_io_num = 12,
-		.data_out_num = 15,
-		.data_in_num = -1                                                       //Not used
+	    .bck_io_num = 4,
+	    .ws_io_num = 12,
+	    .data_out_num = 15,
+	    .data_in_num = -1 // Not used
 	};
 
 	esp_err_t error;
@@ -87,7 +87,8 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 	return 0;
 }
 
-int audio_shutdown(void) {
+int audio_shutdown(void)
+{
 	if (!initialized) {
 		fprintf(stderr, "Audio was not initialized!\n");
 		return -1;
@@ -106,7 +107,8 @@ int audio_shutdown(void) {
 }
 
 /** Convert the given buffer to the proper format for internal dac. */
-static void convert_internal_dac(short* buf, const int n_frames) {
+static void convert_internal_dac(short *buf, const int n_frames)
+{
 	for (int i = 0; i < n_frames * 2; i += 2) {
 		int dac0, dac1;
 
@@ -144,9 +146,9 @@ static void convert_internal_dac(short* buf, const int n_frames) {
 }
 
 /** Apply volume for external dac buffer */
-static void apply_volume(short *buf, const int n_frames) {
-	for (int i = 0; i < n_frames * 2; ++i)
-	{
+static void apply_volume(short *buf, const int n_frames)
+{
+	for (int i = 0; i < n_frames * 2; ++i) {
 		// Apply volume
 		int sample = buf[i] * audio_volume;
 
@@ -170,7 +172,7 @@ void audio_submit(short *buf, int n_frames)
 	if (audio_volume == 0.0f) {
 		for (int i = 0; i < n_frames; i += 2) {
 			buf[i] = 0;
-			buf[i+1] = 0;
+			buf[i + 1] = 0;
 		}
 	}
 
