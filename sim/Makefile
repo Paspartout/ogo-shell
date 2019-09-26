@@ -16,6 +16,7 @@ SRC := ../main/src/main.o \
 	../sim/hardware/system.o \
 	../sim/hardware/sdcard.o \
         ../sim/hardware/audio.o \
+        ../components/acodecs/src/acodecs.o \
         ../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \
 	../components/hardware/src/gbuf.o \

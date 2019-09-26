@@ -92,14 +92,13 @@ v0.2 - Basic music playing capabilities
 - RIGHT: Next Song
 - LEFT: Previous Song
 
-- [ ] audio.c
+- [x] audio.c
 	- [x] Tidy up
 	- [x] Add DAC capabilities
-        - [ ] Simulate audio using SDL
-        - [ ] Understand differential output
-	- [ ] Even more tyding
+        - [x] Simulate audio using SDL
 
 - [ ] acodecs component: component containing all decoders
+        - [ ] abstract decoder component
 	- [x] stb_vorbis
 	- [x] dr_mp3
 	- [ ] mod, xm, it?
@@ -122,6 +121,9 @@ v0.2 - Basic music playing capabilities
 v0.3 - Polish and file management
 ---------------------------------
 
+- [ ] UI/Window System:
+        - [ ] Windows/Apps
+        - [ ] Event bubbling
 - [ ] Figure out a plan for error handling that allows displaying on lcd
 - [ ] Icons instead of f and d
 	- [ ] Create icon font

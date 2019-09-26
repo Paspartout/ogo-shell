@@ -19,7 +19,7 @@ static AudioOutput chosen_output = AudioOutputSpeaker;
 static int shutdown_speaker()
 {
 	esp_err_t error;
-	const char *error_message = "Could not shutdown dac or amplifier amp: %s\n";
+    const char *error_message = "Could not shutdown dac or amplifier amp: %s\n";
 	if ((error = i2s_set_dac_mode(I2S_DAC_CHANNEL_DISABLE)) != ESP_OK) {
 		fprintf(stderr, error_message, esp_err_to_name(error));
 		return -1;

@@ -7,8 +7,8 @@
 /** Information associated to each directory entry */
 typedef struct Entry {
 	char *name;   /** File name */
-	off_t size;   /** File size in bytes? */
-	mode_t mode;  /** Access permissions? */
+    off_t size;   /** File size in bytes */
+    mode_t mode;  /** Filetype and permissions */
 	time_t mtime; /** Modifictaion time. */
 } Entry;
 
