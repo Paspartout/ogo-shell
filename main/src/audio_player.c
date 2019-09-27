@@ -63,6 +63,7 @@ static void draw_player(void)
 	// TODO: Song position/duration?
 	// TODO: Controls, etc
 
+	// TODO: Only update rect that updated
 	display_update();
 }
 
@@ -99,6 +100,7 @@ typedef struct PlayerParam {
 #ifndef SIM
 
 static QueueHandle_t player_cmd_queue;
+static QueueHandle_t player_ack_queue;
 static TaskHandle_t audio_player_task_handle;
 
 static PlayerCmd player_poll_cmd(void)
@@ -109,7 +111,16 @@ static PlayerCmd player_poll_cmd(void)
 	return polled_cmd;
 }
 
-static void player_send_cmd(PlayerCmd cmd) { xQueueSend(player_cmd_queue, &cmd, 0); }
+static void player_send_cmd(PlayerCmd cmd) {
+	xQueueSend(player_cmd_queue, &cmd, 0);
+	int tmp;
+	xQueueReceive(player_ack_queue, &tmp, portMAX_DELAY);
+}
+
+static void player_cmd_ack(void) {
+	int tmp = 42;
+	xQueueSend(player_ack_queue, &tmp, 0);
+}
 
 static void audio_player_start(PlayerParam *param)
 {
@@ -119,6 +130,7 @@ static void audio_player_start(PlayerParam *param)
 		return;
 	}
 	player_cmd_queue = xQueueCreate(1, sizeof(PlayerCmd));
+	player_ack_queue = xQueueCreate(1, sizeof(int));
 }
 
 static void audio_player_terminate(void)
@@ -149,10 +161,15 @@ static PlayerCmd player_poll_cmd(void)
 {
 	SDL_LockMutex(cmd_mut);
 	PlayerCmd polled_cmd = sent_cmd;
-	sent_cmd = PlayerCmdNone;
 	SDL_UnlockMutex(cmd_mut);
 
 	return polled_cmd;
+}
+
+static void player_cmd_ack(void) {
+	SDL_LockMutex(cmd_mut);
+	sent_cmd = PlayerCmdNone;
+	SDL_UnlockMutex(cmd_mut);
 }
 
 static void player_send_cmd(PlayerCmd cmd)
@@ -164,6 +181,13 @@ static void player_send_cmd(PlayerCmd cmd)
 	}
 	sent_cmd = cmd;
 	SDL_UnlockMutex(cmd_mut);
+
+
+	PlayerCmd received_cmd;
+	do {
+	    received_cmd = sent_cmd;
+	    usleep(100);
+	} while(received_cmd != PlayerCmdNone);
 }
 
 static void player_teardown_task()
@@ -183,6 +207,7 @@ static void audio_player_start(PlayerParam *param)
 	assert(thread != NULL);
 	cmd_mut = SDL_CreateMutex();
 	assert(cmd_mut != NULL);
+	playing = true;
 
 	player_send_cmd(PlayerCmdNone);
 }
@@ -225,7 +250,9 @@ static void player_task(void *arg)
 				} else {
 					audio_shutdown();
 				}
+				player_cmd_ack();
 			} else if (received_cmd == PlayerCmdTerminate) {
+				player_cmd_ack();
 				break;
 			}
 		}
@@ -254,6 +281,7 @@ static void handle_keypress(uint16_t keys, bool *quit)
 	case KEYPAD_A:
 		// TODO: Pause/Play
 		player_send_cmd(PlayerCmdPause);
+		draw_player();
 		break;
 	case KEYPAD_B:
 		*quit = true;
@@ -312,13 +340,13 @@ int audio_player(Entry *entries, int index, const char *cwd)
 	assert(param.codec != AudioCodecUnknown);
 	// TODO: Show error if can't determine coodec/filetype/decoder
 
-	// Draw player interface before opening file
-	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
-	draw_player();
-
 	// Start playing the slected file
 	printf("Trying to open audio file: %s\n", param.filepath);
 	audio_player_start(&param);
+
+	// Draw player interface before opening file
+	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
+	draw_player();
 
 	bool quit = false;
 	event_t event;

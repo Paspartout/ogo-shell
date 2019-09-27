@@ -97,22 +97,23 @@ v0.2 - Basic music playing capabilities
 	- [x] Add DAC capabilities
         - [x] Simulate audio using SDL
 
-- [ ] acodecs component: component containing all decoders
+- [x] acodecs component: component containing all decoders
         - [x] abstract decoder component
 	- [x] stb_vorbis
 	- [x] dr_mp3
         - [x] mod, xm, it: libxmp-lite
-	- [ ] dr_wav
-	- [ ] dr_flac
+        - [x] dr_wav
+        - [x] dr_flac
 
 - [ ] audio_player.c:
 	- [x] fix audio_shutdown leaves speaker making noise
 	- [x] mp3 support
-	- [ ] display/sdcard solve spi_bus race condition
+	- [x] display/sdcard solve spi_bus race condition
         - [ ] Show DAC/Speaker output mode in player
         - [ ] Next/last track in folder
             - [ ] automatically
             - [ ] dpad
+            - [ ] what happens if song ended
         - [ ] Show some guide
 
 - [ ] Automatic Backlight control?

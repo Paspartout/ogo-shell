@@ -6,7 +6,8 @@
 #include "esp_event.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
-#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
 
 #include "display.h"
 
@@ -16,7 +17,7 @@ static const gpio_num_t SPI_PIN_NUM_CLK = GPIO_NUM_18;
 
 static const gpio_num_t LCD_PIN_NUM_CS = GPIO_NUM_5;
 static const gpio_num_t LCD_PIN_NUM_DC = GPIO_NUM_21;
-const int LCD_SPI_CLOCK_RATE = SPI_MASTER_FREQ_40M;
+static const int LCD_SPI_CLOCK_RATE = SPI_MASTER_FREQ_40M;
 
 #define MADCTL_MY 0x80
 #define MADCTL_MX 0x40
@@ -29,6 +30,8 @@ static spi_transaction_t trans[8];
 static spi_device_handle_t spi;
 static TaskHandle_t xTaskToNotify = NULL;
 static bool waitForTransactions = false;
+
+SemaphoreHandle_t odroid_spi_mutex = NULL;
 
 #define PARALLEL_LINES (5)
 
@@ -287,11 +290,14 @@ void display_init(void)
 	ret = spi_bus_add_device(HSPI_HOST, &devcfg, &spi);
 	assert(ret == ESP_OK);
 
+	odroid_spi_mutex = xSemaphoreCreateMutex();
+
 	ili_init();
 }
 
 void display_drain(void)
 {
+	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
 	// Drain SPI queue
 	xTaskToNotify = 0;
 
@@ -301,12 +307,14 @@ void display_drain(void)
 		spi_transaction_t *trans_desc;
 		err = spi_device_get_trans_result(spi, &trans_desc, 0);
 	}
+	xSemaphoreGive(odroid_spi_mutex);
 }
 
 void display_poweroff()
 {
 	display_drain();
 
+	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
 	// Disable LCD panel
 	int cmd = 0;
 	while (ili_sleep_cmds[cmd].databytes != 0xff) {
@@ -317,10 +325,12 @@ void display_poweroff()
 		}
 		cmd++;
 	}
+	xSemaphoreGive(odroid_spi_mutex);
 }
 
 void display_clear(uint16_t color)
 {
+	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
 	xTaskToNotify = xTaskGetCurrentTaskHandle();
 
 	send_reset_drawing(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -337,11 +347,14 @@ void display_clear(uint16_t color)
 		send_continue_line(pbuf, DISPLAY_WIDTH, PARALLEL_LINES);
 	}
 
+	waitForTransactions = true;
 	send_continue_wait();
+	xSemaphoreGive(odroid_spi_mutex);
 }
 
 void display_update(void)
 {
+	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
 	xTaskToNotify = xTaskGetCurrentTaskHandle();
 
 	send_reset_drawing(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -352,7 +365,9 @@ void display_update(void)
 		send_continue_line(pbuf, DISPLAY_WIDTH, PARALLEL_LINES);
 	}
 
+	waitForTransactions = true;
 	send_continue_wait();
+	xSemaphoreGive(odroid_spi_mutex);
 }
 
 void display_update_rect(rect_t r)
@@ -366,6 +381,7 @@ void display_update_rect(rect_t r)
 
 	xTaskToNotify = xTaskGetCurrentTaskHandle();
 
+	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
 	send_reset_drawing(r.x, r.y, r.width, r.height);
 
 	if (r.width == DISPLAY_WIDTH) {
@@ -389,5 +405,7 @@ void display_update_rect(rect_t r)
 		}
 	}
 
+	waitForTransactions = true;
 	send_continue_wait();
+	xSemaphoreGive(odroid_spi_mutex);
 }

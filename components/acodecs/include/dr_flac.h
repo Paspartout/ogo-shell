@@ -3140,14 +3140,14 @@ static drflac_bool32 drflac__decode_samples_with_residual__rice__scalar_zeroorde
 static drflac_bool32 drflac__decode_samples_with_residual__rice__scalar(drflac_bs* bs, drflac_uint32 bitsPerSample, drflac_uint32 count, drflac_uint8 riceParam, drflac_uint32 order, drflac_int32 shift, const drflac_int32* coefficients, drflac_int32* pSamplesOut)
 {
     drflac_uint32 t[2] = {0x00000000, 0xFFFFFFFF};
-    drflac_uint32 zeroCountPart0;
-    drflac_uint32 zeroCountPart1;
-    drflac_uint32 zeroCountPart2;
-    drflac_uint32 zeroCountPart3;
-    drflac_uint32 riceParamPart0;
-    drflac_uint32 riceParamPart1;
-    drflac_uint32 riceParamPart2;
-    drflac_uint32 riceParamPart3;
+    drflac_uint32 zeroCountPart0 = 0;
+    drflac_uint32 zeroCountPart1 = 0;
+    drflac_uint32 zeroCountPart2 = 0;
+    drflac_uint32 zeroCountPart3 = 0;
+    drflac_uint32 riceParamPart0 = 0;
+    drflac_uint32 riceParamPart1 = 0;
+    drflac_uint32 riceParamPart2 = 0;
+    drflac_uint32 riceParamPart3 = 0;
     drflac_uint32 riceParamMask;
     const drflac_int32* pSamplesOutEnd;
     drflac_uint32 i;
