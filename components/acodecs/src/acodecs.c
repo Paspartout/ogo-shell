@@ -193,7 +193,7 @@ static int acodec_libxmp_decode(void *handle, int16_t *buf_out, int num_c, unsig
 	xmp_context ctx = (xmp_context)handle;
 	(void)num_c;
 
-	if (xmp_play_buffer(ctx, buf_out, (int)(len * sizeof(uint16_t)), 0) != 0) {
+	if (xmp_play_buffer(ctx, buf_out, (int)(len * sizeof(uint16_t)), 1) != 0) {
 		// TODO: Error handling
 		fprintf(stderr, "error while playing module!\n");
 		return 0;

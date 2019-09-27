@@ -136,6 +136,7 @@ static void convert_internal_dac(short *buf, const int n_frames)
 
 		/* Scale */
 		const int magnitude = 127 + 127;
+		// TODO: When volume is too high for some sounds this causes problems/stutters/clipping
 		const float range = magnitude * normalized * audio_volume;
 
 		/* Convert to differential output. */
