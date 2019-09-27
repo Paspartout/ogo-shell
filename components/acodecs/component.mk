@@ -7,5 +7,6 @@
 # please read the ESP-IDF documents if you need to do this.
 #
 
-COMPONENT_ADD_INCLUDEDIRS = include
-COMPONENT_SRCDIRS = src
+COMPONENT_ADD_INCLUDEDIRS = include src/xmplite
+COMPONENT_SRCDIRS = src src/xmplite src/xmplite/loaders
+CFLAGS += -DLIBXMP_CORE_PLAYER

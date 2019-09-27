@@ -5,3 +5,10 @@ tags
 *.o
 sim/ogo-fm
 .vscode
+ogo-fm.cflags
+ogo-fm.config
+ogo-fm.creator
+ogo-fm.creator.user
+ogo-fm.cxxflags
+ogo-fm.files
+ogo-fm.includes

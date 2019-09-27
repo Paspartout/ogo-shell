@@ -378,7 +378,7 @@ int file_browser(void)
 				} else {
 					// TODO: Proper File handlers
 					const FileType ftype = fops_determine_filetype(entry->name);
-					if (ftype == FileTypeMP3 || ftype == FileTypeOGG) {
+					if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD) {
 						audio_player(browser.cwd_entries, browser.selection, browser.cwd);
 					} else {
 						ui_draw_details(entry, browser.cwd);

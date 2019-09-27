@@ -7,8 +7,8 @@
 /** Information associated to each directory entry */
 typedef struct Entry {
 	char *name;   /** File name */
-    off_t size;   /** File size in bytes */
-    mode_t mode;  /** Filetype and permissions */
+	off_t size;   /** File size in bytes */
+	mode_t mode;  /** Filetype and permissions */
 	time_t mtime; /** Modifictaion time. */
 } Entry;
 
@@ -17,6 +17,7 @@ typedef enum FileType {
 	FileTypeNone,
 	FileTypeMP3,
 	FileTypeOGG,
+	FileTypeMOD,
 } FileType;
 
 /** List all entries of given cwd without fetching file properties. */

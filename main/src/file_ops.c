@@ -135,6 +135,15 @@ FileType fops_determine_filetype(const char *filename)
 		return FileTypeMP3;
 	} else if (!strncasecmp("ogg", &filename[len - 3], 3)) {
 		return FileTypeOGG;
+	} else if (!strncasecmp("xm", &filename[len - 2], 2)) {
+		return FileTypeMOD;
+	} else if (!strncasecmp("mod", &filename[len - 3], 3)) {
+		return FileTypeMOD;
+	} else if (!strncasecmp("s3m", &filename[len - 3], 3)) {
+		return FileTypeMOD;
+	} else if (!strncasecmp("it", &filename[len - 2], 2)) {
+		return FileTypeMOD;
 	}
+
 	return FileTypeNone;
 }

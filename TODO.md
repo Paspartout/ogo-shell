@@ -98,10 +98,10 @@ v0.2 - Basic music playing capabilities
         - [x] Simulate audio using SDL
 
 - [ ] acodecs component: component containing all decoders
-        - [ ] abstract decoder component
+        - [x] abstract decoder component
 	- [x] stb_vorbis
 	- [x] dr_mp3
-	- [ ] mod, xm, it?
+        - [x] mod, xm, it: libxmp-lite
 	- [ ] dr_wav
 	- [ ] dr_flac
 
@@ -109,14 +109,20 @@ v0.2 - Basic music playing capabilities
 	- [x] fix audio_shutdown leaves speaker making noise
 	- [x] mp3 support
 	- [ ] display/sdcard solve spi_bus race condition
+        - [ ] Show DAC/Speaker output mode in player
+        - [ ] Next/last track in folder
+            - [ ] automatically
+            - [ ] dpad
+        - [ ] Show some guide
 
-- [ ] Backlight control
+- [ ] Automatic Backlight control?
 - [ ] Battery meter in top right corner with %
 - [ ] Rename to ogo-shell
 - [ ] Release?
-	- [ ] Update README.md
+        - [ ] Change license to GPL
+        - [ ] Update README.md
 		- [ ] Instructions
-		- [ ] Screenshots
+                - [ ] Screenshots/GIF?
 
 v0.3 - Polish and file management
 ---------------------------------

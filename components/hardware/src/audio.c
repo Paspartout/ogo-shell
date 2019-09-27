@@ -1,4 +1,5 @@
 #include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <driver/i2s.h>
 #include <driver/rtc_io.h>
 #include <driver/dac.h>
@@ -19,7 +20,7 @@ static AudioOutput chosen_output = AudioOutputSpeaker;
 static int shutdown_speaker()
 {
 	esp_err_t error;
-    const char *error_message = "Could not shutdown dac or amplifier amp: %s\n";
+#define error_message "Could not shutdown dac or amplifier amp: %s\n"
 	if ((error = i2s_set_dac_mode(I2S_DAC_CHANNEL_DISABLE)) != ESP_OK) {
 		fprintf(stderr, error_message, esp_err_to_name(error));
 		return -1;
@@ -36,8 +37,13 @@ static int shutdown_speaker()
 		fprintf(stderr, error_message, esp_err_to_name(error));
 		return -1;
 	}
+#undef error_message
 	return 0;
 }
+
+static int16_t silence[64] = {
+    0,
+};
 
 int audio_init(int audio_sample_rate, const AudioOutput output)
 {
@@ -58,7 +64,7 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 				   .dma_buf_count = 6,
 				   .dma_buf_len = 512,
 				   .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-				   .use_apll = output == AudioOutputDAC ? true : false};
+				   .use_apll = output == true ? true : false};
 	const i2s_pin_config_t dac_pin_config = {
 	    .bck_io_num = 4,
 	    .ws_io_num = 12,
@@ -77,13 +83,23 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 		return -1;
 	}
 
-	// Disable interal amplifier when using DAC
+	initialized = true;
+	chosen_output = output;
+
 	if (output == AudioOutputDAC) {
+		// Disable interal amplifier when using DAC
 		shutdown_speaker();
+	} else {
+		// Hack: Send some silence to activate internal dac
+		// Without this the initial samples sent by audio player wont be heard
+		float old_volume = audio_volume;
+		audio_volume = 0.0f;
+		for (int i = 0; i < 128; i++) {
+			audio_submit((int16_t *)silence, 32);
+		}
+		audio_volume = old_volume;
 	}
 
-	chosen_output = output;
-	initialized = true;
 	return 0;
 }
 

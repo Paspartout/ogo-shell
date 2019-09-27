@@ -13,6 +13,7 @@
 #include <backlight.h>
 
 #include <limits.h>
+#include <unistd.h>
 
 #ifndef SIM
 #include <freertos/FreeRTOS.h>
@@ -46,7 +47,7 @@ static void draw_player(void)
 	fill_rectangle(fb, (rect_t){.x = 0, .y = 32, .width = DISPLAY_WIDTH, .height = DISPLAY_HEIGHT - 32}, COLOR_GRAY);
 
 	const int line_height = 16;
-    short y = 34;
+	short y = 34;
 	tf_draw_str(fb, font_white, "Audio Player", (point_t){.x = 3, .y = y});
 	y += line_height;
 	//  Song name
@@ -65,14 +66,17 @@ static void draw_player(void)
 	display_update();
 }
 
-static AudioCodec choose_codec(FileType ftype) {
-    AudioCodec codec = AudioCodecUnknown;
-    if (ftype == FileTypeMP3) {
-        codec = AudioCodecMP3;
-    } else if (ftype == FileTypeOGG) {
-        codec = AudioCodecOGG;
-    }
-    return codec;
+static AudioCodec choose_codec(FileType ftype)
+{
+	AudioCodec codec = AudioCodecUnknown;
+	if (ftype == FileTypeMP3) {
+		codec = AudioCodecMP3;
+	} else if (ftype == FileTypeOGG) {
+		codec = AudioCodecOGG;
+	} else if (ftype == FileTypeMOD) {
+		codec = AudioCodecMOD;
+	}
+	return codec;
 }
 
 typedef enum PlayerCmd {
@@ -81,11 +85,10 @@ typedef enum PlayerCmd {
 	PlayerCmdPause,
 } PlayerCmd;
 
-
 typedef struct PlayerParam {
-    char filepath[PATH_MAX];
-    AudioCodec codec;
-    AudioDecoder *decoder;
+	char filepath[PATH_MAX];
+	AudioCodec codec;
+	AudioDecoder *decoder;
 } PlayerParam;
 
 #ifndef SIM
@@ -95,39 +98,37 @@ static TaskHandle_t audio_player_task_handle;
 
 static PlayerCmd player_poll_cmd(void)
 {
-    PlayerCmd polled_cmd = PlayerCmdNone;
+	PlayerCmd polled_cmd = PlayerCmdNone;
 
-    xQueueReceive(player_cmd_queue, &polled_cmd, 0);
-    return polled_cmd;
+	xQueueReceive(player_cmd_queue, &polled_cmd, 0);
+	return polled_cmd;
 }
 
-static void player_send_cmd(PlayerCmd cmd)
-{
-    xQueueSend(player_cmd_queue, &cmd, 0);
-}
+static void player_send_cmd(PlayerCmd cmd) { xQueueSend(player_cmd_queue, &cmd, 0); }
 
-static void audio_player_start(PlayerParam* param)
+static void audio_player_start(PlayerParam *param)
 {
-    const int stacksize = 9 * 8192; // dr_mp3 uses a lot of stack memory
-    if (xTaskCreate(player_task, "player_task", stacksize, param, 5, &audio_player_task_handle) != pdPASS) {
-        printf("Error creating task\n");
-        return;
-    }
-    player_cmd_queue = xQueueCreate(1, sizeof(PlayerCmd));
+	const int stacksize = 9 * 8192; // dr_mp3 uses a lot of stack memory
+	if (xTaskCreate(player_task, "player_task", stacksize, param, 5, &audio_player_task_handle) != pdPASS) {
+		printf("Error creating task\n");
+		return;
+	}
+	player_cmd_queue = xQueueCreate(1, sizeof(PlayerCmd));
 }
 
 static void audio_player_terminate(void)
 {
-    printf("Trying to terminate player..\n");
-    PlayerCmd term = PlayerCmdTerminate;
-    xQueueSend(player_cmd_queue, &term, portMAX_DELAY);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-    printf("Terminated?\n");
+	printf("Trying to terminate player..\n");
+	PlayerCmd term = PlayerCmdTerminate;
+	xQueueSend(player_cmd_queue, &term, portMAX_DELAY);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
+	printf("Terminated?\n");
 }
 
-static void player_teardown_task() {
-    vTaskDelete(NULL);
-    // Nothing todo here
+static void player_teardown_task()
+{
+	vTaskDelete(NULL);
+	// Nothing todo here
 }
 
 #else
@@ -141,105 +142,105 @@ static PlayerCmd sent_cmd = PlayerCmdNone;
 
 static PlayerCmd player_poll_cmd(void)
 {
-    SDL_LockMutex(cmd_mut);
-    PlayerCmd polled_cmd = sent_cmd;
-    sent_cmd = PlayerCmdNone;
-    SDL_UnlockMutex(cmd_mut);
+	SDL_LockMutex(cmd_mut);
+	PlayerCmd polled_cmd = sent_cmd;
+	sent_cmd = PlayerCmdNone;
+	SDL_UnlockMutex(cmd_mut);
 
-    return polled_cmd;
+	return polled_cmd;
 }
 
 static void player_send_cmd(PlayerCmd cmd)
 {
-    SDL_LockMutex(cmd_mut);
-    if (sent_cmd != PlayerCmdNone) {
-        SDL_UnlockMutex(cmd_mut);
-        return;
-    }
-    sent_cmd = cmd;
-    SDL_UnlockMutex(cmd_mut);
+	SDL_LockMutex(cmd_mut);
+	if (sent_cmd != PlayerCmdNone) {
+		SDL_UnlockMutex(cmd_mut);
+		return;
+	}
+	sent_cmd = cmd;
+	SDL_UnlockMutex(cmd_mut);
 }
 
-static void player_teardown_task() {
-    // Nothing todo here
-}
-
-static int sdl_player_task(void* param) {
-    player_task(param);
-    return 0;
-}
-
-static void audio_player_start(PlayerParam* param)
+static void player_teardown_task()
 {
-    thread = SDL_CreateThread(sdl_player_task, "player_task", param);
-    assert(thread != NULL);
-    cmd_mut = SDL_CreateMutex();
-    assert(cmd_mut != NULL);
-
-    player_send_cmd(PlayerCmdNone);
+	// Nothing todo here
 }
 
-static void audio_player_terminate(void) {
-    player_send_cmd(PlayerCmdTerminate);
+static int sdl_player_task(void *param)
+{
+	player_task(param);
+	return 0;
 }
+
+static void audio_player_start(PlayerParam *param)
+{
+	thread = SDL_CreateThread(sdl_player_task, "player_task", param);
+	assert(thread != NULL);
+	cmd_mut = SDL_CreateMutex();
+	assert(cmd_mut != NULL);
+
+	player_send_cmd(PlayerCmdNone);
+}
+
+static void audio_player_terminate(void) { player_send_cmd(PlayerCmdTerminate); }
 
 #endif
 
 /** This task/thread plays one particular audio file. */
 static void player_task(void *arg)
 {
-    struct PlayerParam* param = arg;
-    const char *fpath = param->filepath;
-    const AudioDecoder* decoder = param->decoder;
-    printf("Playing file: %s, codec: %d\n", fpath, param->codec);
+	struct PlayerParam *param = arg;
+	const char *fpath = param->filepath;
+	const AudioDecoder *decoder = param->decoder;
+	printf("Playing file: %s, codec: %d\n", fpath, param->codec);
 
-    short audio_buf[4096];
-    int n_frames = 0;
+	void *acodec_handle = NULL;
+	if (decoder->open(&acodec_handle, fpath) != 0) {
+		// TODO: Error handling
+		fprintf(stderr, "Error opening audio file\n");
+	}
+	AudioInfo info;
+	decoder->get_info(acodec_handle, &info);
 
-    void* acodec_handle = NULL;
-    if (decoder->open(&acodec_handle, fpath) != 0) {
-        // TODO: Error handling
-        printf("Error opening audio file\n");
-    }
-    AudioInfo info;
-    decoder->get_info(acodec_handle, &info);
+	int16_t *audio_buf = calloc(1, info.buf_size * sizeof(uint16_t));
+	int n_frames = 0;
 
-    audio_init((int)info.sample_rate, output);
+	audio_init((int)info.sample_rate, output);
 
-    playing = true;
-    do {
-        // React on user control
-        PlayerCmd received_cmd = player_poll_cmd();
-        if (received_cmd != PlayerCmdNone) {
-            printf("Received cmd: %d\n", received_cmd);
-            if (received_cmd == PlayerCmdPause) {
-                playing = !playing;
-                if (playing) {
-                    audio_init((int)info.sample_rate, output);
-                } else {
-                    audio_shutdown();
-                }
-            } else if (received_cmd == PlayerCmdTerminate) {
-                break;
-            }
-        }
-        // Play if not paused
-        if (playing) {
-            n_frames = decoder->decode(acodec_handle, audio_buf, (int)info.channels, 4096);
-            audio_submit(audio_buf, n_frames);
-        } else {
-            // TODO: Delay?
-        }
-    } while (n_frames > 0);
-    printf("Terminating player task...\n");
-    decoder->close(acodec_handle);
+	playing = true;
+	do {
+		// React on user control
+		PlayerCmd received_cmd = player_poll_cmd();
+		if (received_cmd != PlayerCmdNone) {
+			printf("Received cmd: %d\n", received_cmd);
+			if (received_cmd == PlayerCmdPause) {
+				playing = !playing;
+				if (playing) {
+					audio_init((int)info.sample_rate, output);
+				} else {
+					audio_shutdown();
+				}
+			} else if (received_cmd == PlayerCmdTerminate) {
+				break;
+			}
+		}
+		// Play if not paused
+		if (playing) {
+			n_frames = decoder->decode(acodec_handle, audio_buf, (int)info.channels, info.buf_size);
+			audio_submit(audio_buf, n_frames);
+		} else {
+			// TODO: Delay?
+		}
+	} while (n_frames > 0);
+	printf("Terminating player task...\n");
+	decoder->close(acodec_handle);
+	free(audio_buf);
 
-    if (playing)
-        audio_shutdown();
+	if (playing)
+		audio_shutdown();
 
-    player_teardown_task();
+	player_teardown_task();
 }
-
 
 static void handle_keypress(uint16_t keys, bool *quit)
 {
@@ -247,7 +248,7 @@ static void handle_keypress(uint16_t keys, bool *quit)
 	switch (keys) {
 	case KEYPAD_A:
 		// TODO: Pause/Play
-        player_send_cmd(PlayerCmdPause);
+		player_send_cmd(PlayerCmdPause);
 		break;
 	case KEYPAD_B:
 		*quit = true;
@@ -288,29 +289,31 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		backlight = !backlight;
 		backlight_percentage_set(backlight ? 50 : 0);
 		break;
-    default:
-        // TODO: Bubble up to parent
-        break;
+	default:
+		// TODO: Bubble up to parent
+		break;
 	} // switch(event.keypad.pressed)
 }
 
 int audio_player(Entry *entries, int index, const char *cwd)
 {
-    // Open file and start playing in seperate task
-    PlayerParam param;
-    filename = entries[index].name;
-    snprintf(param.filepath, PATH_MAX, "%s/%s", cwd, filename);
-    param.codec = choose_codec(fops_determine_filetype(param.filepath));
-    param.decoder = acodec_get_decoder(param.codec);
-    // TODO: Show error if can't determine coodec/filetype/decoder
+	// Open file and start playing in seperate task
+	PlayerParam param;
+	filename = entries[index].name;
+	snprintf(param.filepath, PATH_MAX, "%s/%s", cwd, filename);
+	param.codec = choose_codec(fops_determine_filetype(param.filepath));
+	param.decoder = acodec_get_decoder(param.codec);
+	assert(param.decoder != NULL);
+	assert(param.codec != AudioCodecUnknown);
+	// TODO: Show error if can't determine coodec/filetype/decoder
 
-    // Draw player interface before opening file
+	// Draw player interface before opening file
 	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
 	draw_player();
 
-    // Start playing the slected file
-    printf("Trying to open audio file: %s\n", param.filepath);
-    audio_player_start(&param);
+	// Start playing the slected file
+	printf("Trying to open audio file: %s\n", param.filepath);
+	audio_player_start(&param);
 
 	bool quit = false;
 	event_t event;
@@ -332,7 +335,7 @@ int audio_player(Entry *entries, int index, const char *cwd)
 		}
 	}
 
-    audio_player_terminate();
+	audio_player_terminate();
 
 	tf_free(font_white);
 	// TODO: Deinit audio decoder and driver
