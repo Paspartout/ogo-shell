@@ -3,7 +3,14 @@
 #include <stdint.h>
 
 /** The audiocodec to be decoded. */
-typedef enum AudioCodec { AudioCodecUnknown, AudioCodecMP3, AudioCodecOGG, AudioCodecMOD } AudioCodec;
+typedef enum AudioCodec {
+	AudioCodecUnknown,
+	AudioCodecMP3,
+	AudioCodecOGG,
+	AudioCodecMOD,
+	AudioCodecWAV,
+	AudioCodecFLAC,
+} AudioCodec;
 
 typedef struct AudioInfo {
 	unsigned sample_rate;

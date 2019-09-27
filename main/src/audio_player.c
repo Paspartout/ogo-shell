@@ -68,15 +68,20 @@ static void draw_player(void)
 
 static AudioCodec choose_codec(FileType ftype)
 {
-	AudioCodec codec = AudioCodecUnknown;
-	if (ftype == FileTypeMP3) {
-		codec = AudioCodecMP3;
-	} else if (ftype == FileTypeOGG) {
-		codec = AudioCodecOGG;
-	} else if (ftype == FileTypeMOD) {
-		codec = AudioCodecMOD;
+	switch (ftype) {
+	case FileTypeMOD:
+		return AudioCodecMOD;
+	case FileTypeMP3:
+		return AudioCodecMP3;
+	case FileTypeOGG:
+		return AudioCodecOGG;
+	case FileTypeFLAC:
+		return AudioCodecFLAC;
+	case FileTypeWAV:
+		return AudioCodecWAV;
+	default:
+		return AudioCodecUnknown;
 	}
-	return codec;
 }
 
 typedef enum PlayerCmd {

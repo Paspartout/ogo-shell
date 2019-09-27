@@ -143,6 +143,10 @@ FileType fops_determine_filetype(const char *filename)
 		return FileTypeMOD;
 	} else if (!strncasecmp("it", &filename[len - 2], 2)) {
 		return FileTypeMOD;
+	} else if (!strncasecmp("wav", &filename[len - 3], 3)) {
+		return FileTypeWAV;
+	} else if (!strncasecmp("flac", &filename[len - 4], 4)) {
+		return FileTypeFLAC;
 	}
 
 	return FileTypeNone;

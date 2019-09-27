@@ -21,7 +21,9 @@ SRC := ../main/src/main.o \
         ../components/acodecs/src/acodecs.o \
         ../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \
-        ../components/hardware/src/gbuf.o \
+	../components/acodecs/src/dr_wav.o \
+	../components/acodecs/src/dr_flac.o \
+	../components/hardware/src/gbuf.o \
 	../components/graphics/graphics.o \
 	../components/graphics/tf.o \
         ../components/graphics/OpenSans_Regular_11X12.o \
