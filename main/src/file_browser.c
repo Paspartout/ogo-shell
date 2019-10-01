@@ -362,6 +362,7 @@ int file_browser(void)
 				quit = true;
 				break;
 			case KEYPAD_START:
+				display_screenshot("shot.bmp");
 				ui_draw_details(&browser.cwd_entries[browser.selection], browser.cwd);
 				break;
 			case KEYPAD_SELECT:

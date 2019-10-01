@@ -34,7 +34,7 @@
 #endif
 
 #ifndef APP_NAME
-#define APP_NAME "ogo-fm"
+#define APP_NAME "ogo-shell"
 #endif
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))

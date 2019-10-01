@@ -86,9 +86,11 @@ v0.2 - Basic music playing capabilities
 
 - A: Play/Pause
 - B: Close Song, Go back(Later: Continue playing in the background)
-- START: Switch DAC/Speaker?
+- VOLUME: Switch DAC/Speaker
 - SELECT: Toggle display backlight for longer battery life?
-- VOLUME: Cycle volume
+- START: Toggle Playlist playing mode
+- UP: Increase volume
+- DOWN: Decrease volume
 - RIGHT: Next Song
 - LEFT: Previous Song
 
@@ -105,7 +107,7 @@ v0.2 - Basic music playing capabilities
         - [x] dr_wav
         - [x] dr_flac
 
-- [ ] audio_player.c:
+- [x] audio_player.c:
 	- [x] fix audio_shutdown leaves speaker making noise
 	- [x] mp3 support
 	- [x] display/sdcard solve spi_bus race condition
@@ -122,7 +124,7 @@ v0.2 - Basic music playing capabilities
     - [ ] Speaker/DAC
     - [ ] Battery meter
 
-- [ ] Rename to ogo-shell
+- [x] Rename to ogo-shell
 - [ ] Release?
     - [x] Change license to GPL
     - [ ] Update README.md
@@ -145,9 +147,14 @@ v0.3 - Polish and file management
 - [ ] Wrap around selection if hitting boundaries?
 
 - [ ] Audio Player++
+        - [ ] Fix mono files
         - [ ] New Theme?
         - [ ] Seeking
         - [ ] Show Song Position/Song Length
+        - [ ] Repeat song
+        - [ ] Shuffle Playlist
+        - [ ] Play .m3u/playlist files?
+        - [ ] Minimize Player for multi tasking
 
 - [ ] Bigger Cleanup/Refactor
 	- [ ] Menu as ui_list?

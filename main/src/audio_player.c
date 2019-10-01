@@ -485,7 +485,7 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		break;
 	case KEYPAD_START:
 		// TODO: Stop/Restart Song
-		// display_screenshot("shot.bmp");
+		display_screenshot("shot.bmp");
 		player_send_cmd(PlayerCmdToggleLoopMode);
 		break;
 	case KEYPAD_SELECT:
