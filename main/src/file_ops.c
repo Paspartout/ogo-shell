@@ -123,9 +123,11 @@ void fops_free_entries(Entry **entries, int n_entires)
 	*entries = NULL;
 }
 
-FileType fops_determine_filetype(const char *filename)
+FileType fops_determine_filetype(Entry *entry)
 {
+
 	// TODO: Use regex or something else?
+	const char* filename = entry->name;
 	size_t len = strlen(filename);
 	if (len < 4) {
 		return FileTypeNone;

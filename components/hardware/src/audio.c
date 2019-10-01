@@ -12,7 +12,8 @@
 #define AUDIO_IO_POSITIVE GPIO_NUM_26
 #define I2S_NUM I2S_NUM_0
 
-float audio_volume = 0.5f;
+static int audio_volume = 50;
+static float audio_volume_f = 0.5f;
 
 static bool initialized = false;
 static AudioOutput chosen_output = AudioOutputSpeaker;
@@ -92,12 +93,12 @@ int audio_init(int audio_sample_rate, const AudioOutput output)
 	} else {
 		// Hack: Send some silence to activate internal dac
 		// Without this the initial samples sent by audio player wont be heard
-		float old_volume = audio_volume;
-		audio_volume = 0.0f;
+		float old_volume = audio_volume_f;
+		audio_volume_f = 0.0f;
 		for (int i = 0; i < 128; i++) {
 			audio_submit((int16_t *)silence, 32);
 		}
-		audio_volume = old_volume;
+		audio_volume_f = old_volume;
 	}
 
 	return 0;
@@ -137,7 +138,7 @@ static void convert_internal_dac(short *buf, const int n_frames)
 		/* Scale */
 		const int magnitude = 127 + 127;
 		// TODO: When volume is too high for some sounds this causes problems/stutters/clipping
-		const float range = magnitude * normalized * audio_volume;
+		const float range = magnitude * normalized * audio_volume_f;
 
 		/* Convert to differential output. */
 		if (range > 127) {
@@ -167,10 +168,10 @@ static void apply_volume(short *buf, const int n_frames)
 {
 	for (int i = 0; i < n_frames * 2; ++i) {
 		// Apply volume
-		int sample = buf[i] * audio_volume;
+		int sample = (int)((float)buf[i] * audio_volume_f);
 
 		// clamp sample to short values
-		// TODO: Should not be needed if audio_volume <= 1.0f
+		// TODO: Should not be needed if audio_volume_f <= 1.0f
 		if (sample > 32767)
 			sample = 32767;
 		else if (sample < -32768)
@@ -186,7 +187,7 @@ void audio_submit(short *buf, int n_frames)
 		fprintf(stderr, "audio not yet initialized");
 		return;
 	}
-	if (audio_volume == 0.0f) {
+	if (audio_volume_f == 0.0f) {
 		for (int i = 0; i < n_frames; i += 2) {
 			buf[i] = 0;
 			buf[i + 1] = 0;
@@ -206,3 +207,16 @@ void audio_submit(short *buf, int n_frames)
 		fprintf(stderr, "error submitting data to i2s");
 	}
 }
+
+int audio_volume_set(int volume_percent)
+{
+	if (volume_percent > 100)
+		volume_percent = 100;
+	else if (volume_percent < 0)
+		volume_percent = 0;
+	audio_volume = volume_percent;
+	audio_volume_f = (float)volume_percent / 100.0f;
+	return audio_volume;
+}
+
+int audio_volume_get(void) { return audio_volume; }

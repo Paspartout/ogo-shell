@@ -11,6 +11,7 @@ SRC := ../main/src/main.o \
 	../main/src/file_ops.o \
 	../main/src/file_browser.o \
 	../main/src/audio_player.o \
+	../main/src/ui.o \
 	../sim/hardware/display.o \
 	../sim/hardware/event.o \
 	../sim/hardware/keypad.o \

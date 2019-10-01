@@ -8,7 +8,8 @@
 
 static bool initialized = false;
 static SDL_AudioDeviceID audio_device = 0;
-float audio_volume = 0.5f;
+static int audio_volume = 50;
+static float audio_volume_f = 50;
 
 // TODO: Implement simulation using SDL
 
@@ -70,3 +71,16 @@ void audio_submit(short *buf, int len)
 		SDL_Delay(1);
 	} while (left > 4096);
 }
+
+int audio_volume_set(int volume_percent)
+{
+	if (volume_percent > 100)
+		volume_percent = 100;
+	else if (volume_percent < 0)
+		volume_percent = 0;
+	audio_volume = volume_percent;
+	audio_volume_f = (float)volume_percent / 100.0f;
+	return audio_volume;
+}
+
+int audio_volume_get(void) { return audio_volume; }

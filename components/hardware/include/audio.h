@@ -1,16 +1,23 @@
 #pragma once
 
-extern float audio_volume;
-
 typedef enum AudioOutput {
 	AudioOutputSpeaker,
 	AudioOutputDAC,
 } AudioOutput;
 
-/** Initialize audio driver/i2s with given sample rate and output mode. */
+/// Initialize audio driver/i2s with given sample rate and output mode.
 int audio_init(int sample_rate, const AudioOutput output);
-/** Shutdown audio driver. */
+
+/// Shutdown audio driver.
 int audio_shutdown(void);
 
-/** Submit audio. */
+/// Submit signed 16bit audio for playing.
+/// This blocks until all samples are played/copeid to dma buffer.
 void audio_submit(short *buf, int len);
+
+/// Change audio volume.
+/// vol has to be between 0 and 100.
+int audio_volume_set(int volume_percent);
+
+/// Get the audio volume.
+int audio_volume_get(void);

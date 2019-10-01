@@ -14,11 +14,9 @@
 #include <graphics.h>
 #include <keypad.h>
 #include <tf.h>
+#include <ui.h>
 
 #include <audio_player.h>
-
-#define COLOR_GRAY 0x4A69
-#define COLOR_ORANGE 0xDB60
 
 /* Global state. */
 static struct FileBrowser {
@@ -32,21 +30,6 @@ static struct FileBrowser {
 
 /** Number of entries that can be displayed at once. */
 static const int MAX_WIN_ENTRIES = 13;
-
-static tf_t *font_black;
-static tf_t *font_white;
-
-static void ui_init(void)
-{
-	font_black = tf_new(&font_OpenSans_Regular_11X12, 0x0000, 0, TF_WORDWRAP);
-	font_white = tf_new(&font_OpenSans_Regular_11X12, 0xFFFF, 0, TF_WORDWRAP);
-}
-
-static void ui_free(void)
-{
-	tf_free(font_black);
-	tf_free(font_white);
-}
 
 /** Truncate src to dst at the front.
  *  dst must be allocated with at least len bytes. */
@@ -79,14 +62,14 @@ static void ui_draw_pathbar(const char *path, int selection, int n_entries)
 		// use path directly
 		path_str = path;
 	}
-	tf_draw_str(fb, font_black, path_str, (point_t){.x = 3, .y = 18});
+	tf_draw_str(fb, ui_font_black, path_str, (point_t){.x = 3, .y = 18});
 
 	// Draw selection and number of entries
 	if (n_entries > 0) {
 		char selection_str[16];
 		snprintf(selection_str, 16, "%d/%d", selection, n_entries);
-		const tf_metrics_t m = tf_get_str_metrics(font_black, selection_str);
-		tf_draw_str(fb, font_black, selection_str, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = 18});
+		const tf_metrics_t m = tf_get_str_metrics(ui_font_black, selection_str);
+		tf_draw_str(fb, ui_font_black, selection_str, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = 18});
 	}
 }
 
@@ -109,7 +92,7 @@ static void ui_draw_browser(void)
 	if (browser.n_entries == 0) {
 		browser.selection = 0;
 		fill_rectangle(fb, (rect_t){.x = 0, .y = 32, .width = DISPLAY_WIDTH, .height = DISPLAY_HEIGHT - 32}, 0x0000);
-		tf_draw_str(fb, font_white, "This directory is empty", (point_t){.x = DISPLAY_WIDTH / 2 - 75, .y = DISPLAY_HEIGHT / 2});
+		tf_draw_str(fb, ui_font_white, "This directory is empty", (point_t){.x = DISPLAY_WIDTH / 2 - 75, .y = DISPLAY_HEIGHT / 2});
 		display_update();
 		return;
 	}
@@ -142,14 +125,14 @@ static void ui_draw_browser(void)
 			filename = entry->name;
 		}
 		snprintf(item_str, 64, "%c - %s", (S_ISDIR(entry->mode)) ? 'd' : 'f', filename);
-		tf_draw_str(fb, font_white, item_str, (point_t){.x = 2, .y = rect_y + 2});
+		tf_draw_str(fb, ui_font_white, item_str, (point_t){.x = 2, .y = rect_y + 2});
 
 		// Draw file size
 		if (browser.stat_enabled) {
 			char filesize_buf[32];
 			sprint_human_size(filesize_buf, 32, entry->size);
-			const tf_metrics_t m = tf_get_str_metrics(font_white, filesize_buf);
-			tf_draw_str(fb, font_white, filesize_buf, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = rect_y + 2});
+			const tf_metrics_t m = tf_get_str_metrics(ui_font_white, filesize_buf);
+			tf_draw_str(fb, ui_font_white, filesize_buf, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = rect_y + 2});
 		}
 	}
 
@@ -183,22 +166,6 @@ static void browser_scroll(int amount)
 	}
 }
 
-// TODO: printf like behaviour would be nice for detailed error messages
-static void ui_message_error(const char *msg)
-{
-	// TODO: Display error on display
-	const int ypos = 104;
-	fill_rectangle(fb, (rect_t){.x = 0, .y = ypos, .width = DISPLAY_WIDTH, .height = 16}, 0xF800);
-	tf_draw_str(fb, font_white, msg, (point_t){.x = 3, .y = ypos + 3});
-	fprintf(stderr, "error: %s\n", msg);
-	display_update();
-
-	event_t event;
-	wait_event(&event);
-	while (event.type != EVENT_TYPE_KEYPAD) {
-	};
-}
-
 static void ui_draw_details(Entry *entry, const char *cwd)
 {
 	// Try to retrieve file stats
@@ -211,29 +178,29 @@ static void ui_draw_details(Entry *entry, const char *cwd)
 	char filesize_buf[32];
 	fill_rectangle(fb, (rect_t){.x = 0, .y = 32, .width = DISPLAY_WIDTH, .height = DISPLAY_HEIGHT - 32}, COLOR_GRAY);
 	const int line_height = 16;
-	int y = 34;
-	tf_draw_str(fb, font_white, "Details", (point_t){.x = 3, .y = y});
+	short y = 34;
+	tf_draw_str(fb, ui_font_white, "Details", (point_t){.x = 3, .y = y});
 	y += line_height * 2;
 	// Full file name
 	// TODO: Figure out wordwrapping or scrolling for long filenames
 	snprintf(str_buf, 300, "Name: %s", entry->name);
-	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
+	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height * 2;
 	// File size
 	sprint_human_size(filesize_buf, 32, entry->size);
 	snprintf(str_buf, 256, "Size: %s(%ld Bytes)", filesize_buf, entry->size);
-	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
+	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 	// Modification time
 	sprint_human_size(filesize_buf, 32, entry->size);
 	ctime_r(&entry->mtime, filesize_buf);
 	snprintf(str_buf, 256, "Modification time: %s", filesize_buf);
-	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
+	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 	// Permissions
 	const mode_t permissions = entry->mode & 0777;
 	snprintf(str_buf, 256, "Permissions: %o", permissions);
-	tf_draw_str(fb, font_white, str_buf, (point_t){.x = 3, .y = y});
+	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	// TODO Later: filetype using libmagic?
 
 	display_update();
@@ -336,7 +303,6 @@ int file_browser(void)
 	event_t event;
 
 	browser_init(START_FOLDER);
-	ui_init();
 	browser.n_entries = fops_list_dir(&browser.cwd_entries, browser.cwd);
 	if (browser.n_entries < 0) {
 		browser.n_entries = 0;
@@ -377,10 +343,11 @@ int file_browser(void)
 					browser_cd_down(entry->name);
 				} else {
 					// TODO: Proper File handlers
-					const FileType ftype = fops_determine_filetype(entry->name);
+					const FileType ftype = fops_determine_filetype(entry);
 					if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV ||
 					    ftype == FileTypeFLAC) {
-						audio_player(browser.cwd_entries, browser.selection, browser.cwd);
+						audio_player((AudioPlayerParam){browser.cwd_entries, browser.n_entries, browser.selection,
+										browser.cwd, true});
 					} else {
 						ui_draw_details(entry, browser.cwd);
 					}
@@ -418,7 +385,6 @@ int file_browser(void)
 			break;
 		}
 	}
-	ui_free();
 	fops_free_entries(&browser.cwd_entries, browser.n_entries);
 
 	return 0;

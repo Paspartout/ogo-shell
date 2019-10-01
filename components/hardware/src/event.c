@@ -42,15 +42,15 @@ static void keypad_task(void *arg)
 		}
 
 		if (event.keypad.pressed || event.keypad.released) {
-			xQueueSend(event_queue, &event, portMAX_DELAY);
+			push_event(&event);
 		}
 	}
 }
 
 void event_init(void)
 {
-	event_queue = xQueueCreate(4, sizeof(event_t));
-	xTaskCreate(keypad_task, "keypad", 1024, NULL, 5, NULL);
+	event_queue = xQueueCreate(10, sizeof(event_t));
+	xTaskCreate(keypad_task, "keypad", 4096, NULL, 5, NULL);
 }
 
 int wait_event(event_t *event)
@@ -61,3 +61,5 @@ int wait_event(event_t *event)
 	}
 	return 1;
 }
+
+int push_event(event_t *event) { return xQueueSend(event_queue, event, 10 / portTICK_PERIOD_MS); }

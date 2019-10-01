@@ -4,6 +4,7 @@
 #include "driver/ledc.h"
 #include "driver/spi_master.h"
 #include "esp_event.h"
+#include "esp_log.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "freertos/task.h"
@@ -147,6 +148,7 @@ static void ili_init()
 	gpio_set_direction(LCD_PIN_NUM_DC, GPIO_MODE_OUTPUT);
 
 	// Send all the commands
+	// TODO: Use polling for faster init?
 	while (ili_init_cmds[cmd].databytes != 0xff) {
 		ili_cmd(spi, ili_init_cmds[cmd].cmd);
 		ili_data(spi, ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes & 0x7F);
@@ -234,6 +236,8 @@ static uint16_t *get_pbuf(void)
 
 void display_init(void)
 {
+	ESP_LOGI("display", "spi init...");
+
 	fb = gbuf_new(DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, BIG_ENDIAN);
 	memset(fb->data, 0, DISPLAY_WIDTH * DISPLAY_HEIGHT * 2);
 
@@ -292,7 +296,9 @@ void display_init(void)
 
 	odroid_spi_mutex = xSemaphoreCreateMutex();
 
+	ESP_LOGI("display", "initializing ili...");
 	ili_init();
+	ESP_LOGI("display", "ili init done");
 }
 
 void display_drain(void)
@@ -408,4 +414,10 @@ void display_update_rect(rect_t r)
 	waitForTransactions = true;
 	send_continue_wait();
 	xSemaphoreGive(odroid_spi_mutex);
+}
+
+void display_screenshot(const char *path)
+{
+	// TODO: Implement with stb_img_write or something
+	(void)path;
 }

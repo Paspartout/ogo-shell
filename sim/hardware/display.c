@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <endian.h>
+#include <assert.h>
 
 #include <display.h>
 
@@ -69,3 +70,14 @@ void display_update_rect(rect_t r)
 }
 
 void display_drain() {}
+
+void display_screenshot(const char *path)
+{
+	const size_t fb_size = fb->width * fb->height * fb->bytes_per_pixel;
+	void *pixels = malloc(fb_size);
+	memcpy(pixels, fb->data, fb_size);
+	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(pixels, fb->width, fb->height, 16, fb->width * 2, SDL_PIXELFORMAT_RGB565);
+	assert(surf != NULL);
+	SDL_SaveBMP(surf, path);
+	SDL_FreeSurface(surf);
+}

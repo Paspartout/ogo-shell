@@ -15,6 +15,7 @@ typedef struct Entry {
 /** FileType enumeration used to open files */
 typedef enum FileType {
 	FileTypeNone,
+	FileTypeFolder,
 	FileTypeMP3,
 	FileTypeOGG,
 	FileTypeMOD,
@@ -34,5 +35,5 @@ int fops_stat_entry(Entry *entries, const char *cwd);
 /** Free entries. */
 void fops_free_entries(Entry **entries, int n_entires);
 
-/** Given a filename  */
-FileType fops_determine_filetype(const char *filename);
+/** Given a filename find out the file type  */
+FileType fops_determine_filetype(Entry *entry);

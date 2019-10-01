@@ -109,12 +109,14 @@ v0.2 - Basic music playing capabilities
 	- [x] fix audio_shutdown leaves speaker making noise
 	- [x] mp3 support
 	- [x] display/sdcard solve spi_bus race condition
-        - [ ] Show DAC/Speaker output mode in player
-        - [ ] Next/last track in folder
-            - [ ] automatically
-            - [ ] dpad
-            - [ ] what happens if song ended
-        - [ ] Show some guide
+	- [x] Show DAC/Speaker output mode in player
+	- [x] Refactor to be more sane with player state etc
+	- [x] Next/last track in folder
+	    - [x] automatically
+            - [x] dpad
+            - [x] what happens if song ended
+        - [ ] Show some guide on player
+        - [x] Error handling for bad audio files
 
 - [ ] Automatic Backlight control?
 - [ ] Battery meter in top right corner with %
@@ -145,17 +147,28 @@ v0.3 - Polish and file management
 	- [ ] Dialogs?
 	- [ ] Smaller but static functions
 
-- [ ] START -> Dialog
+- [ ] START -> Action Dialog
 	- [ ] Details
 - [ ] SELECT -> Select/Mark files
 	- [ ] Show selection as different background color
 - [ ] Understand and correct partitions.csv
 
 
-Future versions
----------------
+Ideas for future versions(maybe)
+--------------------------------
+
+- [ ] More Audio codecs
+    - [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/amiga/nes tunes
+    - [ ] AAC - License Isuses?
+    - [ ] OPUS - Library small and fast enough?
+
+- [ ] Bluetooh Audio Streaming
+- [ ] Musical Alarm Clock with NTP Time Sync
+- [ ] Make a filesytem on flash with some demo content
 
 - [ ] Show sdcard statistics using [getfree](http://elm-chan.org/fsw/ff/doc/getfree.html)
+- [ ] Act as an emulator launcher to launch rom files
+- [ ] Maybe even become a firmware that can install and launch *.fw files
 
 - [ ] Odroid API Work?
 	- [ ] Better error handling

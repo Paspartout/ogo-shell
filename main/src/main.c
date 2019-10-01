@@ -20,6 +20,7 @@
 #include <gbuf.h>
 #include <graphics.h>
 #include <tf.h>
+#include <ui.h>
 
 #include <file_browser.h>
 
@@ -38,15 +39,12 @@
 
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
 
-static tf_t *ui_font;
-static tf_t *ui_font_error;
-
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 static void ui_display_msg(const char *title, const char *msg)
 {
-	tf_metrics_t m1 = tf_get_str_metrics(ui_font_error, title);
-	tf_metrics_t m2 = tf_get_str_metrics(ui_font_error, msg);
+	tf_metrics_t m1 = tf_get_str_metrics(ui_font_red, title);
+	tf_metrics_t m2 = tf_get_str_metrics(ui_font_red, msg);
 	// determine message location
 	point_t text_location = {
 	    .x = fb->width / 2 - (MAX(m1.width, m2.width)) / 2,
@@ -60,9 +58,9 @@ static void ui_display_msg(const char *title, const char *msg)
 	};
 
 	fill_rectangle(fb, clear_rec, 0x0000);
-	tf_draw_str(fb, ui_font_error, title, text_location);
+	tf_draw_str(fb, ui_font_red, title, text_location);
 	text_location.y += m1.height;
-	tf_draw_str(fb, ui_font_error, msg, text_location);
+	tf_draw_str(fb, ui_font_red, msg, text_location);
 
 	display_update();
 }
@@ -74,9 +72,7 @@ static int app_init(void)
 	backlight_percentage_set(50);
 	keypad_init();
 	event_init();
-
-	ui_font = tf_new(&font_OpenSans_Regular_11X12, 0x0000, 0, TF_ALIGN_CENTER);
-	ui_font_error = tf_new(&font_OpenSans_Regular_11X12, 0xF800, 0, TF_ALIGN_CENTER);
+	ui_init();
 
 	// Setup sdcard and display error message on failure
 	// TODO: Make it nonfatal so user can still browse SPIFFS or so
@@ -99,8 +95,7 @@ static int app_init(void)
 
 static void app_shutdown(void)
 {
-	tf_free(ui_font);
-	tf_free(ui_font_error);
+	ui_free();
 	sdcard_deinit();
 	display_poweroff();
 	reboot_to_firmware();
@@ -115,7 +110,7 @@ void app_main_task(void *arg)
 
 	// Draw title
 	fill_rectangle(fb, (rect_t){.x = 0, .y = 0, .width = DISPLAY_WIDTH, .height = 16}, 0xFFFF);
-	tf_draw_str(fb, ui_font, APP_NAME " " APP_VERSION, (point_t){.x = 3, .y = 3});
+	tf_draw_str(fb, ui_font_black, APP_NAME " " APP_VERSION, (point_t){.x = 3, .y = 3});
 	display_update_rect((rect_t){.x = 0, .y = 0, .width = DISPLAY_WIDTH, .height = 16});
 
 	file_browser();
