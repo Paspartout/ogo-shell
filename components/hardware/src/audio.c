@@ -220,3 +220,6 @@ int audio_volume_set(int volume_percent)
 }
 
 int audio_volume_get(void) { return audio_volume; }
+
+void audio_output_set(AudioOutput output) { chosen_output = output; }
+AudioOutput audio_output_get(void) { return chosen_output; }

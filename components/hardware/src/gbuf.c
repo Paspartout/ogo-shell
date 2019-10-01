@@ -5,9 +5,14 @@
 
 gbuf_t *gbuf_new(uint16_t width, uint16_t height, uint16_t bytes_per_pixel, bool big_endian)
 {
-	gbuf_t *g = calloc(1, sizeof(gbuf_t) + width * height * bytes_per_pixel);
+	gbuf_t *g = calloc(1, sizeof(gbuf_t));
 	if (g == NULL)
 		return NULL;
+	g->data = calloc(1, width * height * bytes_per_pixel);
+	if (g->data == NULL) {
+		free(g);
+		return NULL;
+	}
 
 	g->width = width;
 	g->height = height;
@@ -17,4 +22,8 @@ gbuf_t *gbuf_new(uint16_t width, uint16_t height, uint16_t bytes_per_pixel, bool
 	return g;
 }
 
-void gbuf_free(gbuf_t *g) { free(g); }
+void gbuf_free(gbuf_t *g)
+{
+	free(g->data);
+	free(g);
+}

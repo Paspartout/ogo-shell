@@ -21,3 +21,9 @@ int audio_volume_set(int volume_percent);
 
 /// Get the audio volume.
 int audio_volume_get(void);
+
+/// Set the audio output.
+void audio_output_set(AudioOutput output);
+
+/// Set the currently set audio output.
+AudioOutput audio_output_get(void);

@@ -10,6 +10,7 @@ static bool initialized = false;
 static SDL_AudioDeviceID audio_device = 0;
 static int audio_volume = 50;
 static float audio_volume_f = 50;
+static AudioOutput chosen_output = AudioOutputSpeaker;
 
 // TODO: Implement simulation using SDL
 
@@ -42,6 +43,9 @@ int audio_init(int sample_rate, const AudioOutput output)
 	printf("Initialized audio: sr=%d output=%d\n", sample_rate, output);
 	SDL_PauseAudioDevice(audio_device, 0);
 	initialized = true;
+
+	// TODO: Load settings from nvs?
+
 	return 0;
 }
 
@@ -84,3 +88,6 @@ int audio_volume_set(int volume_percent)
 }
 
 int audio_volume_get(void) { return audio_volume; }
+
+void audio_output_set(AudioOutput output) { chosen_output = output; }
+AudioOutput audio_output_get(void) { return chosen_output; }

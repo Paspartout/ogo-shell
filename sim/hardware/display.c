@@ -8,6 +8,8 @@ static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *canvas = NULL;
 
+gbuf_t *fb;
+
 // TODO: Refactor odroid go library to also return int?
 static int display_init2(void)
 {

@@ -11,6 +11,7 @@
 #include <audio.h>
 #include <backlight.h>
 #include <ui.h>
+#include <guide_img.c>
 
 #include <limits.h>
 #include <unistd.h>
@@ -66,7 +67,7 @@ typedef enum PlayerCmd {
 	PlayerCmdPause,
 	PlayerCmdNext,
 	PlayerCmdPrev,
-	PlayerCmdToggleOutput,
+	PlayerCmdReinitAudio,
 } PlayerCmd;
 
 // Owned by player task, can only be modified/written to by player task
@@ -83,8 +84,6 @@ typedef struct PlayerState {
 	// Can be modified through PlayNext/PlayPrev
 	int playlist_index;
 	bool loop_playlist;
-
-	AudioOutput output;
 } PlayerState;
 static PlayerState player_state = {
     0,
@@ -264,17 +263,16 @@ static PlayerResult handle_cmd(PlayerState *const state, const AudioInfo info, c
 	case PlayerCmdPause:
 		state->playing = !state->playing;
 		if (state->playing) {
-			audio_init((int)info.sample_rate, state->output);
+			audio_init((int)info.sample_rate, audio_output_get());
 		} else {
 			audio_shutdown();
 		}
 		push_audio_event(AudioPlayerEventStateChanged);
 		break;
-	case PlayerCmdToggleOutput:
-		state->output = state->output == AudioOutputSpeaker ? AudioOutputDAC : AudioOutputSpeaker;
+	case PlayerCmdReinitAudio:
 		if (state->playing)
 			audio_shutdown();
-		audio_init((int)info.sample_rate, state->output);
+		audio_init((int)info.sample_rate, audio_output_get());
 		push_audio_event(AudioPlayerEventStateChanged);
 		break;
 	case PlayerCmdTerminate:
@@ -318,7 +316,7 @@ static PlayerResult play_song(const Song *const song)
 
 	int16_t *audio_buf = calloc(1, info.buf_size * sizeof(uint16_t));
 	// TODO: Should check calloc?
-	audio_init((int)info.sample_rate, state->output);
+	audio_init((int)info.sample_rate, audio_output_get());
 
 	int n_frames = 0;
 	state->playing = true;
@@ -435,22 +433,27 @@ static void draw_player(const PlayerState *const state)
 	// Playlist position
 	snprintf(str_buf, 300, "Playlist: %d/%d", state->playlist_index + 1, (int)state->playlist_length);
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
-	y += line_height * 2;
-
-	// Show Playing or paused
-	tf_draw_str(fb, ui_font_white, state->playing ? "State: Playing" : "State: Paused", (point_t){.x = 3, .y = y});
-	y += line_height;
-
-	// Show output mode
-	tf_draw_str(fb, ui_font_white, state->output == AudioOutputSpeaker ? "Output: Speaker" : "Output: External DAC",
-		    (point_t){.x = 3, .y = y});
 	y += line_height;
 
 	// Show volume
 	snprintf(str_buf, 300, "Volume: %d%%", audio_volume_get());
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
-	y += line_height;
+	y += line_height * 2;
 
+	// Show Playing or paused
+	tf_draw_str(fb, ui_font_white, state->playing ? "Pause" : "Continue", (point_t){.x = 222, .y = 125});
+	tf_draw_str(fb, ui_font_white, "Go back", (point_t){.x = 222, .y = 125 + 37});
+	tf_draw_str(fb, ui_font_white, audio_output_get() == AudioOutputSpeaker ? "Switch DAC" : "Switch Speaker",
+		    (point_t){.x = 222, .y = 125 + 37 + 37});
+
+	gbuf_t img = {.width = (uint16_t)guide_img.width,
+		      .height = (uint16_t)guide_img.height,
+		      .bytes_per_pixel = 2,
+		      .data = (uint8_t *)&guide_img.pixel_data,
+		      .big_endian = false};
+	blit(fb, (rect_t){.x = 10, .y = y, .width = img.width, .height = img.height - 1}, &img,
+	     (rect_t){.x = 0, .y = 1, .width = img.width, .height = img.height - 1});
+	// guide_img.pixel_data
 	// TODO: Song position/duration?
 	// TODO: Controls, etc
 	// TODO: Only update changes?
@@ -487,7 +490,8 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		break;
 	case KEYPAD_VOLUME:
 		// Vol: Toggle DAC
-		player_send_cmd(PlayerCmdToggleOutput);
+		audio_output_set(audio_output_get() == AudioOutputDAC ? AudioOutputSpeaker : AudioOutputDAC);
+		player_send_cmd(PlayerCmdReinitAudio);
 		break;
 	case KEYPAD_START:
 		// TODO: Stop/Restart Song

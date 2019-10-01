@@ -115,17 +115,19 @@ v0.2 - Basic music playing capabilities
 	    - [x] automatically
             - [x] dpad
             - [x] what happens if song ended
-        - [ ] Show some guide on player
+        - [x] Show some guide on player
         - [x] Error handling for bad audio files
 
-- [ ] Automatic Backlight control?
-- [ ] Battery meter in top right corner with %
+- [ ] Status bar
+    - [ ] Speaker/DAC
+    - [ ] Battery meter
+
 - [ ] Rename to ogo-shell
 - [ ] Release?
-        - [ ] Change license to GPL
-        - [ ] Update README.md
-		- [ ] Instructions
-                - [ ] Screenshots/GIF?
+    - [x] Change license to GPL
+    - [ ] Update README.md
+            - [ ] Instructions
+            - [ ] Screenshots/GIF?
 
 v0.3 - Polish and file management
 ---------------------------------
@@ -142,6 +144,11 @@ v0.3 - Polish and file management
 - [ ] Remember old selection_pos when going back
 - [ ] Wrap around selection if hitting boundaries?
 
+- [ ] Audio Player++
+        - [ ] New Theme?
+        - [ ] Seeking
+        - [ ] Show Song Position/Song Length
+
 - [ ] Bigger Cleanup/Refactor
 	- [ ] Menu as ui_list?
 	- [ ] Dialogs?
@@ -151,8 +158,6 @@ v0.3 - Polish and file management
 	- [ ] Details
 - [ ] SELECT -> Select/Mark files
 	- [ ] Show selection as different background color
-- [ ] Understand and correct partitions.csv
-
 
 Ideas for future versions(maybe)
 --------------------------------
