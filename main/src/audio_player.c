@@ -68,6 +68,7 @@ typedef enum PlayerCmd {
 	PlayerCmdNext,
 	PlayerCmdPrev,
 	PlayerCmdReinitAudio,
+	PlayerCmdToggleLoopMode,
 } PlayerCmd;
 
 // Owned by player task, can only be modified/written to by player task
@@ -275,6 +276,10 @@ static PlayerResult handle_cmd(PlayerState *const state, const AudioInfo info, c
 		audio_init((int)info.sample_rate, audio_output_get());
 		push_audio_event(AudioPlayerEventStateChanged);
 		break;
+	case PlayerCmdToggleLoopMode:
+		state->loop_playlist = !state->loop_playlist;
+		push_audio_event(AudioPlayerEventStateChanged);
+		break;
 	case PlayerCmdTerminate:
 		res = PlayerResultStop;
 		break;
@@ -369,7 +374,7 @@ static void player_task(void *arg)
 				push_audio_event(AudioPlayerEventDone);
 				break;
 			}
-			song_index = song_index + 1 % (int)state->playlist_length;
+			song_index = (song_index + 1) % (int)state->playlist_length;
 			state->playlist_index = song_index;
 			push_audio_event(AudioPlayerEventStateChanged);
 		} else if (res == PlayerResultPrevSong) {
@@ -390,27 +395,6 @@ static void player_task(void *arg)
 	player_task_running = false;
 	player_teardown_task();
 }
-
-#if 0
-static void switch_song(int diff) {
-    int res = 0;
-    do {
-
-	    file_index = (file_index + diff);
-	    if (file_index > file_list_length-1) {
-		    file_index = 0;
-	    }
-	    if (file_index < 0) {
-		    file_index = file_list_length-1;
-	    }
-
-	printf("file_index: %d\n", file_index);
-	res = prepare_play_song(&player_param);
-    } while (res != 0);
-    audio_player_terminate();
-    audio_player_start(&player_param);
-}
-#endif
 
 static void draw_player(const PlayerState *const state)
 {
@@ -435,17 +419,23 @@ static void draw_player(const PlayerState *const state)
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 
+	// Playlist loop mode
+	snprintf(str_buf, 300, "Repeat playlist: %s", state->loop_playlist ? "enabled" : "disabled");
+	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
+	y += line_height;
+
 	// Show volume
 	snprintf(str_buf, 300, "Volume: %d%%", audio_volume_get());
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
-	y += line_height * 2;
+	y += line_height + 10;
 
-	// Show Playing or paused
-	tf_draw_str(fb, ui_font_white, state->playing ? "Pause" : "Continue", (point_t){.x = 222, .y = 125});
-	tf_draw_str(fb, ui_font_white, "Go back", (point_t){.x = 222, .y = 125 + 37});
+	// Show Playing or paused/DAC on image
+	tf_draw_str(fb, ui_font_white, state->playing ? "Pause" : "Continue", (point_t){.x = 222, .y = y + 10});
+	tf_draw_str(fb, ui_font_white, "Go back", (point_t){.x = 222, .y = y + 10 + 37});
 	tf_draw_str(fb, ui_font_white, audio_output_get() == AudioOutputSpeaker ? "Switch DAC" : "Switch Speaker",
-		    (point_t){.x = 222, .y = 125 + 37 + 37});
+		    (point_t){.x = 222, .y = y + 10 + 37 * 2});
 
+	// Display help image
 	gbuf_t img = {.width = (uint16_t)guide_img.width,
 		      .height = (uint16_t)guide_img.height,
 		      .bytes_per_pixel = 2,
@@ -453,9 +443,9 @@ static void draw_player(const PlayerState *const state)
 		      .big_endian = false};
 	blit(fb, (rect_t){.x = 10, .y = y, .width = img.width, .height = img.height - 1}, &img,
 	     (rect_t){.x = 0, .y = 1, .width = img.width, .height = img.height - 1});
-	// guide_img.pixel_data
+
 	// TODO: Song position/duration?
-	// TODO: Controls, etc
+
 	// TODO: Only update changes?
 	display_update_rect(window_rect);
 }
@@ -495,7 +485,8 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		break;
 	case KEYPAD_START:
 		// TODO: Stop/Restart Song
-		display_screenshot("shot.bmp");
+		// display_screenshot("shot.bmp");
+		player_send_cmd(PlayerCmdToggleLoopMode);
 		break;
 	case KEYPAD_SELECT:
 		backlight = !backlight;
@@ -621,6 +612,8 @@ int audio_player(AudioPlayerParam params)
 
 	player_terminate();
 	free_playlist(&player_state);
+	backlight = true;
+	backlight_percentage_set(50);
 
 	return 0;
 }
