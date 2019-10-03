@@ -97,15 +97,15 @@ v0.2 - Basic music playing capabilities
 - [x] audio.c
 	- [x] Tidy up
 	- [x] Add DAC capabilities
-        - [x] Simulate audio using SDL
+		- [x] Simulate audio using SDL
 
 - [x] acodecs component: component containing all decoders
-        - [x] abstract decoder component
+		- [x] abstract decoder component
 	- [x] stb_vorbis
 	- [x] dr_mp3
-        - [x] mod, xm, it: libxmp-lite
-        - [x] dr_wav
-        - [x] dr_flac
+		- [x] mod, xm, it: libxmp-lite
+		- [x] dr_wav
+		- [x] dr_flac
 
 - [x] audio_player.c:
 	- [x] fix audio_shutdown leaves speaker making noise
@@ -114,25 +114,25 @@ v0.2 - Basic music playing capabilities
 	- [x] Show DAC/Speaker output mode in player
 	- [x] Refactor to be more sane with player state etc
 	- [x] Next/last track in folder
-	    - [x] automatically
-            - [x] dpad
-            - [x] what happens if song ended
-        - [x] Show some guide on player
-        - [x] Error handling for bad audio files
+		- [x] automatically
+			- [x] dpad
+			- [x] what happens if song ended
+		- [x] Show some guide on player
+		- [x] Error handling for bad audio files
 
 - [x] Status bar
-    - [x] Battery meter
+	- [x] Battery meter
 
 - [x] Save DAC/Volume and AudioPlayer settings to NVM
 
 - [x] Rename to ogo-shell
 - [ ] Release
-    - [x] Change license to GPL
-    - [ ] Update README.md
-            - [x] Instructions
-            - [ ] Screenshots/GIF?
-    - [ ] Build and upload firmware
-    - [ ] Move all known issues and features to GitHub?
+	- [x] Change license to GPL
+	- [ ] Update README.md
+			- [x] Instructions
+			- [ ] Screenshots/GIF?
+	- [ ] Build and upload firmware
+	- [ ] Move all known issues and features to GitHub?
 
 v0.3 - Small improvements and Chiptunes
 ---------------------------------------
@@ -145,8 +145,8 @@ v0.4 - Polishing/UI Revamp
 
 - [ ] Speaker/DAC in Statusbar
 - [ ] UI/Window System:
-        - [ ] Windows/Apps
-        - [ ] Event bubbling
+		- [ ] Windows/Apps
+		- [ ] Event bubbling
 - [ ] Figure out a plan for error handling that allows displaying on lcd
 - [ ] Icons instead of f and d
 	- [ ] Create icon font
@@ -157,14 +157,14 @@ v0.4 - Polishing/UI Revamp
 - [ ] Wrap around selection if hitting boundaries?
 
 - [ ] Audio Player++
-        - [ ] Fix mono files playback
-        - [ ] New Theme?
-        - [ ] Seeking
-        - [ ] Show Song Position/Song Length
-        - [ ] Repeat song
-        - [ ] Shuffle Playlist
-        - [ ] Play .m3u/playlist files?
-        - [ ] Minimize Player for multi tasking
+	- [ ] Fix mono files playback
+	- [ ] New Theme?
+	- [ ] Seeking
+	- [ ] Show Song Position/Song Length
+	- [ ] Repeat song
+	- [ ] Shuffle Playlist
+	- [ ] Play .m3u/playlist files?
+	- [ ] Minimize Player for multi tasking
 
 - [ ] Bigger Cleanup/Refactor
 	- [ ] Menu as ui_list?
@@ -180,8 +180,8 @@ Ideas for future versions(maybe)
 --------------------------------
 
 - [ ] More Audio codecs
-    - [ ] AAC - License Isuses?
-    - [ ] OPUS - Library small and fast enough?
+	- [ ] AAC - License Isuses?
+	- [ ] OPUS - Library small and fast enough?
 
 - [ ] Bluetooh Audio Streaming
 - [ ] Musical Alarm Clock with NTP Time Sync
