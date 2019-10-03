@@ -3,7 +3,7 @@ sdkconfig.old
 TODO.md
 tags
 *.o
-sim/ogo-fm
+sim/ogo-shell
 .vscode
 ogo-fm.cflags
 ogo-fm.config
