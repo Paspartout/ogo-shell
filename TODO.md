@@ -126,13 +126,13 @@ v0.2 - Basic music playing capabilities
 - [x] Save DAC/Volume and AudioPlayer settings to NVM
 
 - [x] Rename to ogo-shell
-- [ ] Release
+- [x] Release
 	- [x] Change license to GPL
-	- [ ] Update README.md
-			- [x] Instructions
-			- [ ] Screenshots/GIF?
-	- [ ] Build and upload firmware
-	- [ ] Move all known issues and features to GitHub?
+	- [x] Update README.md
+		- [x] Instructions
+		- [x] Screenshots/GIF?
+	- [x] Build and upload firmware
+	- [x] Move all known issues and features to GitHub?
 
 v0.3 - Small improvements and Chiptunes
 ---------------------------------------

@@ -17,7 +17,7 @@ Features
 - Display Metadata/Details of files
 - Audio Player
 	- Supported Formats: MP3, OGG, WAV, FLAC, Modules(MOD,XM,IT,S3M)
-	- Plays all audio files in a folder
+	- Plays all audio files in a folder as a playlist
 	- Audio can be played through Speaker or external DAC
 
 There are a lot more ideas for features and improvements.
@@ -32,8 +32,8 @@ You should be able to download the latest fw file from [Githubs releases][releas
 
 ### Controls for File Browser
 
-- UP: Menu go up
-- DOWN: Menu go down
+- UP: Go one file up in menu
+- DOWN: Go one file down
 - RIGHT: Jump page down
 - LEFT: Jump page up
 - A: Go into directory/Show file details/Play file
@@ -47,8 +47,8 @@ You should be able to download the latest fw file from [Githubs releases][releas
 - A: Play/Pause
 - B: Close Song, Go back(Later: Continue playing in the background)
 - VOLUME: Switch DAC/Speaker
-- SELECT: Toggle display backlight for longer battery life?
-- START: Toggle Playlist playing mode
+- SELECT: Toggle display backlight for longer battery life
+- START: Toggle playlist playing mode(repeat playlist)
 - UP: Increase volume
 - DOWN: Decrease volume
 - RIGHT: Next Song
@@ -77,9 +77,16 @@ I used the [hello-world-app] from [Jeff Kent] which uses his [hardware-lib]
 to handle the odroids hardware. It made the development easier even though
 I had to modify some functions to provide me with error context. Thanks!
 Take a look at [LICENSE.template](LICENSE.template) for the license of his code.
-I chose GPLv3 mainly to be more compatible with future libraries I want to use.
+
+The name and concept of this application is inspired by the similar [3dshell] from joel16.
 
 The audio playing libraries used are [stb_vorbis], [dr_mp3, dr_flac, dr_wav][drlibs] and [libxmp-lite].
+
+License
+-------
+
+I chose GPLv3 for ogo-shell mainly to be more compatible with future libraries I want to use.
+Take a look at LICENSE for a copy of the license.
 
 [Jeff Kent]: https://github.com/jkent
 [odroid-go]: https://wiki.odroid.com/odroid_go/odroid_go
@@ -93,3 +100,4 @@ The audio playing libraries used are [stb_vorbis], [dr_mp3, dr_flac, dr_wav][drl
 [stb_vorbis]: https://github.com/nothings/stb 
 [drlibs]: https://github.com/mackron/dr_libs 
 [libxmp-lite]: https://github.com/cmatsuoka/libxmp/tree/master/lite
+[3dshell]: https://github.com/joel16/3DShell
