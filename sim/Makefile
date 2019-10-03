@@ -21,6 +21,7 @@ SRC := ../main/src/main.o \
 	../sim/hardware/sdcard.o \
         ../sim/hardware/audio.o \
         ../sim/hardware/battery.o \
+        ../sim/hardware/settings.o \
         ../components/acodecs/src/acodecs.o \
         ../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \

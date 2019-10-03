@@ -123,7 +123,7 @@ v0.2 - Basic music playing capabilities
 - [x] Status bar
     - [x] Battery meter
 
-- [ ] Save DAC/Volume and AudioPlayer settings to NVM
+- [x] Save DAC/Volume and AudioPlayer settings to NVM
 
 - [x] Rename to ogo-shell
 - [ ] Release
@@ -134,8 +134,14 @@ v0.2 - Basic music playing capabilities
     - [ ] Build and upload firmware
     - [ ] Move all known issues and features to GitHub?
 
-v0.3 - Polishing
-----------------
+v0.3 - Small improvements and Chiptunes
+---------------------------------------
+
+- [ ] Bugfixes and minor improvements
+- [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
+
+v0.4 - Polishing/UI Revamp
+--------------------------
 
 - [ ] Speaker/DAC in Statusbar
 - [ ] UI/Window System:
@@ -151,7 +157,7 @@ v0.3 - Polishing
 - [ ] Wrap around selection if hitting boundaries?
 
 - [ ] Audio Player++
-        - [ ] Fix mono files
+        - [ ] Fix mono files playback
         - [ ] New Theme?
         - [ ] Seeking
         - [ ] Show Song Position/Song Length
@@ -174,7 +180,6 @@ Ideas for future versions(maybe)
 --------------------------------
 
 - [ ] More Audio codecs
-    - [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/amiga/nes tunes
     - [ ] AAC - License Isuses?
     - [ ] OPUS - Library small and fast enough?
 

@@ -18,6 +18,8 @@
 #include <system.h>
 #include <battery.h>
 #include <status_bar.h>
+#include <settings.h>
+#include <audio.h>
 
 #include <OpenSans_Regular_11X12.h>
 #include <gbuf.h>
@@ -68,6 +70,17 @@ static void ui_display_msg(const char *title, const char *msg)
 	display_update();
 }
 
+static void load_all_settings(void)
+{
+	int32_t value;
+	if (settings_load(SettingAudioVolume, &value) == 0) {
+		audio_volume_set(value);
+	}
+	if (settings_load(SettingAudioOutput, &value) == 0) {
+		audio_output_set((AudioOutput)value);
+	}
+}
+
 static int app_init(void)
 {
 	display_init();
@@ -76,11 +89,10 @@ static int app_init(void)
 	keypad_init();
 	event_init();
 	system_led_init();
-	system_led_set(true);
-	usleep(100000);
-	system_led_set(false);
 	battery_init();
 	ui_init();
+	settings_init();
+	load_all_settings();
 
 	// Setup sdcard and display error message on failure
 	// TODO: Make it nonfatal so user can still browse SPIFFS or so

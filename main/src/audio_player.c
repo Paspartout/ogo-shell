@@ -11,6 +11,7 @@
 #include <audio.h>
 #include <backlight.h>
 #include <ui.h>
+#include <settings.h>
 #include <guide_img.c>
 
 #include <limits.h>
@@ -467,11 +468,13 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		// Volume up
 		audio_volume_set(audio_volume_get() + 5);
 		draw_player(&player_state);
+		settings_save(SettingAudioVolume, audio_volume_get());
 		break;
 	case KEYPAD_DOWN:
 		// Volume down
 		audio_volume_set(audio_volume_get() - 5);
 		draw_player(&player_state);
+		settings_save(SettingAudioVolume, audio_volume_get());
 		break;
 	case KEYPAD_RIGHT:
 		// Try to play next song in list
@@ -484,10 +487,12 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		// Toggle DAC/Speaker output mode
 		audio_output_set(audio_output_get() == AudioOutputDAC ? AudioOutputSpeaker : AudioOutputDAC);
 		player_send_cmd(PlayerCmdReinitAudio);
+		settings_save(SettingAudioOutput, (int32_t)audio_output_get());
 		break;
 	case KEYPAD_START:
 		// Toggle playing mode
 		player_send_cmd(PlayerCmdToggleLoopMode);
+		settings_save(SettingPlaylistMode, player_state.loop_playlist);
 		break;
 	case KEYPAD_SELECT:
 		backlight = !backlight;
@@ -569,9 +574,18 @@ static void free_playlist(PlayerState *state)
 	free(state->playlist);
 }
 
+static void load_settings(PlayerState *state)
+{
+	int32_t mode;
+	if (settings_load(SettingPlaylistMode, &mode) == 0) {
+		state->loop_playlist = mode ? true : false;
+	}
+}
+
 int audio_player(AudioPlayerParam params)
 {
 	memset(&player_state, 0, sizeof(PlayerState));
+	load_settings(&player_state);
 
 	if (make_playlist(&player_state, params) != 0) {
 		ui_message_error("Could not determine audio codec");
