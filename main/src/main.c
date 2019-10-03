@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 // Driver/Hardware
@@ -15,6 +16,8 @@
 #include <keypad.h>
 #include <sdcard.h>
 #include <system.h>
+#include <battery.h>
+#include <status_bar.h>
 
 #include <OpenSans_Regular_11X12.h>
 #include <gbuf.h>
@@ -72,6 +75,11 @@ static int app_init(void)
 	backlight_percentage_set(50);
 	keypad_init();
 	event_init();
+	system_led_init();
+	system_led_set(true);
+	usleep(100000);
+	system_led_set(false);
+	battery_init();
 	ui_init();
 
 	// Setup sdcard and display error message on failure
@@ -98,7 +106,7 @@ static void app_shutdown(void)
 	ui_free();
 	sdcard_deinit();
 	display_poweroff();
-	reboot_to_firmware();
+	system_reboot_to_firmware();
 }
 
 void app_main_task(void *arg)
@@ -112,6 +120,7 @@ void app_main_task(void *arg)
 	fill_rectangle(fb, (rect_t){.x = 0, .y = 0, .width = DISPLAY_WIDTH, .height = 16}, 0xFFFF);
 	tf_draw_str(fb, ui_font_black, APP_NAME " " APP_VERSION, (point_t){.x = 3, .y = 3});
 	display_update_rect((rect_t){.x = 0, .y = 0, .width = DISPLAY_WIDTH, .height = 16});
+	status_bar_start();
 
 	file_browser();
 

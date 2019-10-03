@@ -82,6 +82,8 @@ typedef struct PlayerState {
 	// Marks current song index in playlist
 	// Can be modified through PlayNext/PlayPrev
 	int playlist_index;
+
+	// TODO: Settings, should probably saved
 	bool loop_playlist;
 } PlayerState;
 static PlayerState player_state = {

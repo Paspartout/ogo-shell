@@ -120,11 +120,10 @@ v0.2 - Basic music playing capabilities
         - [x] Show some guide on player
         - [x] Error handling for bad audio files
 
-- [ ] Status bar
-    - [ ] Speaker/DAC
-    - [ ] Battery meter
+- [x] Status bar
+    - [x] Battery meter
 
-- [ ] Save DAC/Volume settings to NVM
+- [ ] Save DAC/Volume and AudioPlayer settings to NVM
 
 - [x] Rename to ogo-shell
 - [ ] Release
@@ -135,9 +134,10 @@ v0.2 - Basic music playing capabilities
     - [ ] Build and upload firmware
     - [ ] Move all known issues and features to GitHub?
 
-v0.3 - Polish and file management
----------------------------------
+v0.3 - Polishing
+----------------
 
+- [ ] Speaker/DAC in Statusbar
 - [ ] UI/Window System:
         - [ ] Windows/Apps
         - [ ] Event bubbling

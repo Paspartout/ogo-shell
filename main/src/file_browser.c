@@ -242,7 +242,6 @@ static int browser_cd(const char *new_cwd)
 	if (browser.stat_enabled)
 		fops_stat_entries(browser.cwd_entries, browser.n_entries, browser.cwd);
 
-	ui_draw_browser();
 	return 0;
 }
 
@@ -353,11 +352,12 @@ int file_browser(void)
 					} else {
 						ui_draw_details(entry, browser.cwd);
 					}
-					ui_draw_browser();
 				}
+				ui_draw_browser();
 			} break;
 			case KEYPAD_B:
 				browser_cd_up();
+				ui_draw_browser();
 				break;
 			case KEYPAD_MENU:
 				// TODO: Help Window + Quit Option

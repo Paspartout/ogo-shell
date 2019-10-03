@@ -385,9 +385,9 @@ void display_update_rect(rect_t r)
 	assert(r.x + r.width <= DISPLAY_WIDTH);
 	assert(r.y + r.height <= DISPLAY_HEIGHT);
 
-	xTaskToNotify = xTaskGetCurrentTaskHandle();
-
 	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
+
+	xTaskToNotify = xTaskGetCurrentTaskHandle();
 	send_reset_drawing(r.x, r.y, r.width, r.height);
 
 	if (r.width == DISPLAY_WIDTH) {

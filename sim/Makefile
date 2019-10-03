@@ -12,6 +12,7 @@ SRC := ../main/src/main.o \
 	../main/src/file_browser.o \
 	../main/src/audio_player.o \
 	../main/src/ui.o \
+	../main/src/status_bar.o \
 	../sim/hardware/display.o \
 	../sim/hardware/event.o \
 	../sim/hardware/keypad.o \
@@ -19,6 +20,7 @@ SRC := ../main/src/main.o \
 	../sim/hardware/system.o \
 	../sim/hardware/sdcard.o \
         ../sim/hardware/audio.o \
+        ../sim/hardware/battery.o \
         ../components/acodecs/src/acodecs.o \
         ../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \
