@@ -292,9 +292,11 @@ static int browser_cd_up(void)
 }
 
 #ifdef SIM
-#define START_FOLDER "/home/paspartout/mus"
+#ifndef START_FOLDER
+#define START_FOLDER "/"
+#endif
 #else
-#define START_FOLDER "/sdcard/mus"
+#define START_FOLDER "/sdcard"
 #endif
 
 int file_browser(void)
@@ -362,7 +364,9 @@ int file_browser(void)
 				quit = true;
 				break;
 			case KEYPAD_START:
-				display_screenshot("shot.bmp");
+				if (browser.n_entries <= 0) {
+					continue;
+				}
 				ui_draw_details(&browser.cwd_entries[browser.selection], browser.cwd);
 				break;
 			case KEYPAD_SELECT:
@@ -375,16 +379,16 @@ int file_browser(void)
 				break;
 			} // switch(event.keypad.pressed)
 		} break;
-		default:
-			printf("OTHER!\n");
-			break;
 		case EVENT_TYPE_QUIT:
 			quit = true;
 			break;
 		case EVENT_TYPE_UPDATE:
 			display_update();
 			break;
-		}
+		default:
+			printf("Other event detected\n");
+			break;
+		} // switch(event.type)
 	}
 	fops_free_entries(&browser.cwd_entries, browser.n_entries);
 

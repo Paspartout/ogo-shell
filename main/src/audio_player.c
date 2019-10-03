@@ -54,9 +54,7 @@ typedef struct {
 	char *filename;
 	char *filepath;
 	AudioCodec codec;
-
-	// TODO:
-	// int position; // For seeking?
+	// TODO: Add more information in later versions
 } Song;
 
 // Cmds sent to player task for control
@@ -120,7 +118,7 @@ static void player_send_cmd(PlayerCmd cmd)
 {
 	xQueueSend(player_cmd_queue, &cmd, 0);
 	int tmp;
-	xQueueReceive(player_ack_queue, &tmp, portMAX_DELAY);
+	xQueueReceive(player_ack_queue, &tmp, 10 / portTICK_PERIOD_MS);
 }
 
 static void player_cmd_ack(void)
@@ -136,8 +134,8 @@ static void player_start(void)
 		printf("Error creating task\n");
 		return;
 	}
-	player_cmd_queue = xQueueCreate(10, sizeof(PlayerCmd));
-	player_ack_queue = xQueueCreate(10, sizeof(int));
+	player_cmd_queue = xQueueCreate(3, sizeof(PlayerCmd));
+	player_ack_queue = xQueueCreate(3, sizeof(int));
 }
 
 static void player_terminate(void)
@@ -320,7 +318,12 @@ static PlayerResult play_song(const Song *const song)
 	}
 
 	int16_t *audio_buf = calloc(1, info.buf_size * sizeof(uint16_t));
-	// TODO: Should check calloc?
+	if (audio_buf == NULL) {
+		decoder->close(acodec);
+		fprintf(stderr, "error allocating audio buffer\n");
+		return PlayerResultError;
+	}
+
 	audio_init((int)info.sample_rate, audio_output_get());
 
 	int n_frames = 0;
@@ -341,7 +344,7 @@ static PlayerResult play_song(const Song *const song)
 			n_frames = decoder->decode(acodec, audio_buf, (int)info.channels, info.buf_size);
 			audio_submit(audio_buf, n_frames);
 		} else {
-			// TODO: Delay?
+			usleep(10 * 1000);
 		}
 	} while (n_frames > 0);
 
@@ -446,7 +449,6 @@ static void draw_player(const PlayerState *const state)
 
 	// TODO: Song position/duration?
 
-	// TODO: Only update changes?
 	display_update_rect(window_rect);
 }
 
@@ -454,7 +456,6 @@ static void handle_keypress(uint16_t keys, bool *quit)
 {
 	switch (keys) {
 	case KEYPAD_A:
-		// TODO: Pause/Play
 		player_send_cmd(PlayerCmdPause);
 		break;
 	case KEYPAD_B:
@@ -475,17 +476,15 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		player_send_cmd(PlayerCmdNext);
 		break;
 	case KEYPAD_LEFT:
-		// TODO: Prev song
 		player_send_cmd(PlayerCmdPrev);
 		break;
 	case KEYPAD_VOLUME:
-		// Vol: Toggle DAC
+		// Toggle DAC/Speaker output mode
 		audio_output_set(audio_output_get() == AudioOutputDAC ? AudioOutputSpeaker : AudioOutputDAC);
 		player_send_cmd(PlayerCmdReinitAudio);
 		break;
 	case KEYPAD_START:
-		// TODO: Stop/Restart Song
-		display_screenshot("shot.bmp");
+		// Toggle playing mode
 		player_send_cmd(PlayerCmdToggleLoopMode);
 		break;
 	case KEYPAD_SELECT:
@@ -500,9 +499,9 @@ static void handle_keypress(uint16_t keys, bool *quit)
 
 #define MAX_SONGS 1024
 
+/// Make playlist out of entries in params and write them to state.
 static int make_playlist(PlayerState *state, const AudioPlayerParam params)
 {
-	// Make song/songs in state_out
 	char pathbuf[PATH_MAX];
 
 	if (params.play_all) {
@@ -555,6 +554,7 @@ static int make_playlist(PlayerState *state, const AudioPlayerParam params)
 	return 0;
 }
 
+/// Free previously allocated/created playlist.
 static void free_playlist(PlayerState *state)
 {
 	const size_t len = state->playlist_length;
@@ -571,7 +571,6 @@ int audio_player(AudioPlayerParam params)
 {
 	memset(&player_state, 0, sizeof(PlayerState));
 
-	// TODO: Show error if can't determine coodec/filetype/decoder?
 	if (make_playlist(&player_state, params) != 0) {
 		ui_message_error("Could not determine audio codec");
 		return -1;

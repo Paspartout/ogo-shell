@@ -124,12 +124,16 @@ v0.2 - Basic music playing capabilities
     - [ ] Speaker/DAC
     - [ ] Battery meter
 
+- [ ] Save DAC/Volume settings to NVM
+
 - [x] Rename to ogo-shell
-- [ ] Release?
+- [ ] Release
     - [x] Change license to GPL
     - [ ] Update README.md
-            - [ ] Instructions
+            - [x] Instructions
             - [ ] Screenshots/GIF?
+    - [ ] Build and upload firmware
+    - [ ] Move all known issues and features to GitHub?
 
 v0.3 - Polish and file management
 ---------------------------------

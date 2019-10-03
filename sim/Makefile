@@ -1,9 +1,9 @@
-CFLAGS := -O2 -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -O0 -g -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
+CFLAGS := $(CFLAGS) -Og -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
 LDLIBS := -lSDL2 -lm
 
 # TODO: Header dependencies
 
-TARGET := ogo-fm
+TARGET := ogo-shell
 
 LIBXM_SRC := $(wildcard ../components/acodecs/src/xmplite/*.c) $(wildcard ../components/acodecs/src/xmplite/loaders/*.c)
 
