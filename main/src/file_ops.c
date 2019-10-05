@@ -127,7 +127,7 @@ FileType fops_determine_filetype(Entry *entry)
 {
 
 	// TODO: Use regex or something else?
-	const char* filename = entry->name;
+	const char *filename = entry->name;
 	size_t len = strlen(filename);
 	if (len < 4) {
 		return FileTypeNone;
@@ -149,6 +149,10 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeWAV;
 	} else if (!strncasecmp("flac", &filename[len - 4], 4)) {
 		return FileTypeFLAC;
+	} else if (!strncasecmp("jpeg", &filename[len - 4], 4) || !strncasecmp("jpg", &filename[len - 3], 3)) {
+		return FileTypeJPEG;
+	} else if (!strncasecmp("png", &filename[len - 3], 3)) {
+		return FileTypePNG;
 	}
 
 	return FileTypeNone;

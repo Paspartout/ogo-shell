@@ -21,6 +21,11 @@ typedef enum FileType {
 	FileTypeMOD,
 	FileTypeWAV,
 	FileTypeFLAC,
+
+	FileTypeJPEG,
+	FileTypePNG,
+	FileTypeGIF,
+	FileTypeBMP,
 } FileType;
 
 /** List all entries of given cwd without fetching file properties. */

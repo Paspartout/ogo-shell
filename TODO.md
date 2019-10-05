@@ -134,11 +134,19 @@ v0.2 - Basic music playing capabilities
 	- [x] Build and upload firmware
 	- [x] Move all known issues and features to GitHub?
 
-v0.3 - Small improvements and Chiptunes
----------------------------------------
+v0.3 - Bugfixes, Image viewer and Chiptunes!
+--------------------------------------------
 
+- [x] Simple image viewer(for small images)
+- [ ] Keylock when screen is off?
+    - [ ] How to unlock
 - [ ] Bugfixes and minor improvements
+    - [ ] Mono file playback
 - [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
+
+### Maybe
+
+- [ ] Optimize image loading to use less memory in order to open larger images
 
 v0.4 - Polishing/UI Revamp
 --------------------------

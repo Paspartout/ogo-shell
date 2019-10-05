@@ -17,6 +17,7 @@
 #include <ui.h>
 
 #include <audio_player.h>
+#include <image_viewer.h>
 
 /* Global state. */
 static struct FileBrowser {
@@ -255,7 +256,7 @@ static int path_cd_up(char *cwd, char *new_cwd)
 	// Remove upmost directory
 	bool copy = false;
 	int len = 0;
-	for (ssize_t i = strlen(cwd); i >= 0; i--) {
+	for (ssize_t i = (ssize_t)strlen(cwd); i >= 0; i--) {
 		if (cwd[i] == '/')
 			copy = true;
 		if (copy) {
@@ -297,6 +298,19 @@ static int browser_cd_up(void)
 #else
 #define START_FOLDER "/sdcard"
 #endif
+
+static void open_file(Entry *entry)
+{
+	// TODO: Proper File handlers
+	const FileType ftype = fops_determine_filetype(entry);
+	if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV || ftype == FileTypeFLAC) {
+		audio_player((AudioPlayerParam){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd, true});
+	} else if (ftype == FileTypeJPEG || ftype == FileTypePNG) {
+		image_viewer((ImageViewerParams){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd});
+	} else {
+		ui_draw_details(entry, browser.cwd);
+	}
+}
 
 int file_browser(void)
 {
@@ -343,15 +357,7 @@ int file_browser(void)
 				if (S_ISDIR(entry->mode)) {
 					browser_cd_down(entry->name);
 				} else {
-					// TODO: Proper File handlers
-					const FileType ftype = fops_determine_filetype(entry);
-					if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV ||
-					    ftype == FileTypeFLAC) {
-						audio_player((AudioPlayerParam){browser.cwd_entries, browser.n_entries, browser.selection,
-										browser.cwd, true});
-					} else {
-						ui_draw_details(entry, browser.cwd);
-					}
+					open_file(entry);
 				}
 				ui_draw_browser();
 			} break;

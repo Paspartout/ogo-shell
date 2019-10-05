@@ -1,4 +1,4 @@
-CFLAGS := $(CFLAGS) -Og -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
+CFLAGS := $(CFLAGS) -O2 -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
 LDLIBS := -lSDL2 -lm
 
 # TODO: Header dependencies
@@ -11,6 +11,7 @@ SRC := ../main/src/main.o \
 	../main/src/file_ops.o \
 	../main/src/file_browser.o \
 	../main/src/audio_player.o \
+	../main/src/image_viewer.o \
 	../main/src/ui.o \
 	../main/src/status_bar.o \
 	../sim/hardware/display.o \
