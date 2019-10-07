@@ -275,7 +275,7 @@ static void open_file(Entry *entry)
 	const FileType ftype = fops_determine_filetype(entry);
 	if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV || ftype == FileTypeFLAC) {
 		audio_player((AudioPlayerParam){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd, true});
-	} else if (ftype == FileTypeJPEG || ftype == FileTypePNG) {
+	} else if (ftype == FileTypeJPEG || ftype == FileTypePNG || ftype == FileTypeBMP || ftype == FileTypeGIF) {
 		image_viewer((ImageViewerParams){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd});
 	} else {
 		ui_draw_details(entry, browser.cwd);

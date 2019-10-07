@@ -153,6 +153,10 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeJPEG;
 	} else if (!strncasecmp("png", &filename[len - 3], 3)) {
 		return FileTypePNG;
+	} else if (!strncasecmp("bmp", &filename[len - 3], 3)) {
+		return FileTypeBMP;
+	} else if (!strncasecmp("gif", &filename[len - 3], 3)) {
+		return FileTypeGIF;
 	}
 
 	return FileTypeNone;

@@ -1,6 +1,7 @@
 #include <event.h>
 #include <keypad.h>
 #include <assert.h>
+#include <display.h>
 
 #include <SDL2/SDL.h>
 
@@ -67,6 +68,10 @@ int wait_event(event_t *event)
 				event->keypad.pressed = map_sdl_keysym(e.key.keysym.sym);
 			else
 				event->keypad.pressed = 0;
+
+			if (e.key.keysym.sym == SDLK_F1) {
+				display_screenshot("shot.bmp");
+			}
 			break;
 		case SDL_KEYUP:
 			event->type = EVENT_TYPE_KEYPAD;

@@ -1,7 +1,7 @@
 ogo-shell
 =========
 
-File browser and music player for the [odroid-go].
+File browser, music player and image viewer for the [odroid-go].
 
 Screenshots
 -----------
@@ -9,6 +9,8 @@ Screenshots
 ![File Browser](media/shot_fm.png)
 
 ![Media Player](media/shot_player.png)
+
+![Image Vieiwer](media/shot_viewer.png)
 
 Features
 --------
@@ -19,6 +21,8 @@ Features
 	- Supported Formats: MP3, OGG, WAV, FLAC, Modules(MOD,XM,IT,S3M)
 	- Plays all audio files in a folder as a playlist
 	- Audio can be played through Speaker or external DAC
+- Image viewer
+	- Opens small jpg, png, bmp files
 
 There are a lot more ideas for features and improvements.
 You can find some of them in the [TODO.md](https://github.com/Paspartout/ogo-shell/blob/master/TODO.md) file.
@@ -48,13 +52,20 @@ You should be able to download the latest fw file from [Githubs releases][releas
 - B: Close Song, Go back(Later: Continue playing in the background)
 - VOLUME: Switch DAC/Speaker
 - SELECT:
-        - Press shortly: Toggle display backlight for longer battery life
-        - Press for longer than one second: Toggle keylock and display
+	- Press shortly: Toggle display backlight for longer battery life
+	- Press for longer than one second: Toggle keylock and display
 - START: Toggle playlist playing mode(repeat playlist)
 - UP: Increase volume
 - DOWN: Decrease volume
 - RIGHT: Next Song
 - LEFT: Previous Song
+
+### Controls for Image Vieiwer
+
+- B: Close Image, Go back
+- RIGHT: Open next image in folder
+- LEFT: Open previous image in folder
+- START: Toggle fullscreen mode
 
 Building
 --------
@@ -82,7 +93,9 @@ Take a look at [LICENSE.template](LICENSE.template) for the license of his code.
 
 The name and concept of this application is inspired by the similar [3dshell] from joel16.
 
-The audio playing libraries used are [stb_vorbis], [dr_mp3, dr_flac, dr_wav][drlibs] and [libxmp-lite].
+The audio playing libraries used are [stb_vorbis][stb], [dr_mp3, dr_flac, dr_wav][drlibs] and [libxmp-lite].
+
+For the image viewer [stb_image][stb] is used.
 
 License
 -------
@@ -99,7 +112,7 @@ Take a look at LICENSE for a copy of the license.
 [esp-idf-setup]: https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html
 [mkfw]: https://github.com/OtherCrashOverride/odroid-go-firmware/tree/master/tools/mkfw
 [releases]: https://github.com/Paspartout/ogo-shell/releases
-[stb_vorbis]: https://github.com/nothings/stb 
+[stb]: https://github.com/nothings/stb 
 [drlibs]: https://github.com/mackron/dr_libs 
 [libxmp-lite]: https://github.com/cmatsuoka/libxmp/tree/master/lite
 [3dshell]: https://github.com/joel16/3DShell

@@ -1,5 +1,7 @@
 CC := clang
 CFLAGS := $(CFLAGS) -O0 -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
+
+CFLAGS += -fsanitize=address
 LDLIBS := -lSDL2 -lm
 
 # TODO: Header dependencies
@@ -40,7 +42,7 @@ OBJ := ${SRC:.c=.o}
 
 all: $(TARGET)
 
-# LDFLAGS := -fsanitize=undefined -fno-omit-frame-pointer -fsanitize=address
+LDFLAGS := -fsanitize=undefined -fno-omit-frame-pointer -fsanitize=address
 
 $(TARGET): ${OBJ}
 	@echo LD $@
