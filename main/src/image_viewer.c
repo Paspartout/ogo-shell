@@ -4,6 +4,7 @@
 #include <keypad.h>
 #include <file_ops.h>
 #include <ui.h>
+#include <status_bar.h>
 
 #include <stdbool.h>
 
@@ -21,6 +22,7 @@ static struct ViewerState {
 	/// Index of currently viewed file/photo in params.entries
 	int index;
 
+	bool fullscreen_enabled;
 	ImageViewerParams params;
 } state;
 
@@ -28,19 +30,19 @@ static const int CANVAS_WIDTH = (DISPLAY_WIDTH);
 static const int CANVAS_HEIGHT = (DISPLAY_HEIGHT - 32);
 
 // TODO: Figure this out properly
-static float calc_scalefactor(int width, int height)
+static float calc_scalefactor(int width, int height, int target_width, int target_height)
 {
 	float sf = 0.0;
 	if (height > width) {
 		// Fit height
-		sf = CANVAS_HEIGHT / (float)height;
+		sf = target_height / (float)height;
 	} else {
 		// Fit width
-		sf = CANVAS_WIDTH / (float)width;
+		sf = target_width / (float)width;
 	}
 
-	if (sf * height > CANVAS_HEIGHT) {
-		sf = CANVAS_HEIGHT / (float)height;
+	if (sf * height > target_height) {
+		sf = target_height / (float)height;
 	}
 	return sf;
 }
@@ -57,8 +59,14 @@ static char error_buf[ERROR_BUF_SIZE];
 static void draw_pathbar(const char *filename, int width, int height)
 {
 	assert(filename != NULL);
-	char size_str[32];
-	snprintf(size_str, 32, "%dx%d", width, height);
+	char *size_str = NULL;
+	char size_buf[32];
+
+	if (width > 0 && height > 0) {
+		snprintf(size_buf, 32, "%dx%d", width, height);
+		size_str = size_buf;
+	}
+
 	ui_draw_pathbar(filename, size_str, false);
 }
 
@@ -75,12 +83,20 @@ static int draw_image(const char *img_fullpath, const char *filename)
 	}
 
 	// Scaling the image down to fit height or width of canvas/screen
-	const float scale_factor = calc_scalefactor(img_width, img_height);
+	int target_width, target_height;
+	if (state.fullscreen_enabled) {
+		target_width = DISPLAY_WIDTH;
+		target_height = DISPLAY_HEIGHT;
+	} else {
+		target_width = CANVAS_WIDTH;
+		target_height = CANVAS_HEIGHT;
+	}
+	const float scale_factor = calc_scalefactor(img_width, img_height, target_width, target_height);
 	const int scaled_width = (int)(scale_factor * img_width);
 	const int scaled_height = (int)(scale_factor * img_height);
 
-	assert(scaled_width >= 0 && scaled_width <= CANVAS_WIDTH);
-	assert(scaled_height >= 0 && scaled_height <= CANVAS_HEIGHT);
+	assert(scaled_width >= 0 && scaled_width <= DISPLAY_WIDTH);
+	assert(scaled_height >= 0 && scaled_height <= DISPLAY_HEIGHT);
 
 	gbuf_t *scaled_img = gbuf_new((uint16_t)scaled_width, (uint16_t)scaled_height, 2, false);
 	if (scaled_img == NULL) {
@@ -107,19 +123,24 @@ static int draw_image(const char *img_fullpath, const char *filename)
 	}
 	stbi_image_free(img_data);
 
-	// Finally display the image at the right place
-	draw_pathbar(filename, img_width, img_height);
 	rect_t dest_rect = {
-	    .x = CANVAS_WIDTH / 2 - (short)scaled_width / 2,
-	    .y = 32,
+	    .x = (short)target_width / 2 - (short)scaled_width / 2,
+	    .y = ((short)target_height / 2 - (short)scaled_height / 2) + (state.fullscreen_enabled ? 0 : 32),
 	    .width = (short)scaled_width,
 	    .height = (short)scaled_height,
 	};
-	fill_rectangle(fb, (rect_t){.x = 0, .y = 32, .width = CANVAS_WIDTH, .height = CANVAS_HEIGHT}, 0x0000);
+
+	if (!state.fullscreen_enabled) {
+		fill_rectangle(fb, (rect_t){.x = 0, .y = 32, .width = (short)target_width, .height = (short)target_height}, 0x0000);
+		draw_pathbar(filename, img_width, img_height);
+	} else {
+		fill_rectangle(fb, (rect_t){.x = 0, .y = 0, .width = (short)target_width, .height = (short)target_height}, 0x0000);
+	}
+
 	blit(fb, dest_rect, scaled_img, (rect_t){.x = 0, .y = 0, .width = (short)scaled_width, .height = (short)scaled_height});
+	display_update();
 
 	gbuf_free(scaled_img);
-	display_update_rect((rect_t){.x = 0, .y = 32, .width = CANVAS_WIDTH, .height = CANVAS_HEIGHT});
 	return 0;
 }
 
@@ -150,6 +171,14 @@ static void next_prev_img(int diff)
 	} while (ret != 0);
 }
 
+static void exit_fullscreen(void)
+{
+	const rect_t black_rect = {.x = 0, .y = 31, .height = 1, .width = DISPLAY_WIDTH};
+	fill_rectangle(fb, black_rect, 0x0000);
+	display_update_rect(black_rect);
+	status_bar_draw();
+}
+
 static void handle_keypress(uint16_t keys, bool *quit)
 {
 	switch (keys) {
@@ -173,6 +202,11 @@ static void handle_keypress(uint16_t keys, bool *quit)
 	case KEYPAD_VOLUME:
 		break;
 	case KEYPAD_START:
+		state.fullscreen_enabled = !state.fullscreen_enabled;
+		if (!state.fullscreen_enabled) {
+			exit_fullscreen();
+		}
+		draw_image(get_imgpath(), state.params.entries[state.index].name);
 		break;
 	case KEYPAD_SELECT:
 		break;
@@ -213,6 +247,8 @@ int image_viewer(ImageViewerParams params)
 			break;
 		}
 	}
+
+	exit_fullscreen();
 
 	return 0;
 }

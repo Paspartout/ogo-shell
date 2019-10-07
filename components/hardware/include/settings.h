@@ -4,7 +4,7 @@
 typedef enum Setting {
 	SettingAudioVolume = 0,
 	SettingAudioOutput,
-	SettingPlaylistMode,
+	SettingPlayingMode,
 	SettingMax,
 } Setting;
 

@@ -71,6 +71,14 @@ typedef enum PlayerCmd {
 	PlayerCmdToggleLoopMode,
 } PlayerCmd;
 
+typedef enum PlayingMode {
+	PlayingModeNormal = 0,
+	PlayingModeRepeatSong,
+	PlayingModeRepeatPlaylist,
+	PlayingModeMax,
+} PlayingMode;
+static const char *playing_mode_str[PlayingModeMax] = {"Normal", "Repeat Song", "Repeat Playlist/Folder"};
+
 // Owned by player task, can only be modified/written to by player task
 typedef struct PlayerState {
 	// Can be modified though Playing/Pause Cmd
@@ -86,7 +94,7 @@ typedef struct PlayerState {
 	int playlist_index;
 
 	// TODO: Settings, should probably saved
-	bool loop_playlist;
+	PlayingMode playing_mode;
 } PlayerState;
 static PlayerState player_state = {
     0,
@@ -281,7 +289,7 @@ static PlayerResult handle_cmd(PlayerState *const state, const AudioInfo info, c
 		push_audio_event(AudioPlayerEventStateChanged);
 		break;
 	case PlayerCmdToggleLoopMode:
-		state->loop_playlist = !state->loop_playlist;
+		state->playing_mode = (state->playing_mode + 1) % PlayingModeMax;
 		push_audio_event(AudioPlayerEventStateChanged);
 		break;
 	case PlayerCmdTerminate:
@@ -346,6 +354,7 @@ static PlayerResult play_song(const Song *const song)
 		}
 
 		// Play if not paused
+		// TODO: Fix mono playback
 		if (state->playing) {
 			n_frames = decoder->decode(acodec, audio_buf, (int)info.channels, info.buf_size);
 			audio_submit(audio_buf, n_frames);
@@ -378,17 +387,21 @@ static void player_task(void *arg)
 		PlayerResult res = play_song(song);
 
 		if (res == PlayerResultDone || res == PlayerResultNextSong) {
-			if (!state->loop_playlist && song_index == (int)(state->playlist_length - 1)) {
+			if (state->playing_mode == PlayingModeNormal && song_index == (int)(state->playlist_length - 1)) {
 				// Reached last song in playlist. Quit player.
 				push_audio_event(AudioPlayerEventDone);
 				break;
 			}
-			song_index = (song_index + 1) % (int)state->playlist_length;
+
+			if (state->playing_mode != PlayingModeRepeatSong || res == PlayerResultNextSong) {
+				song_index = (song_index + 1) % (int)state->playlist_length;
+			}
+
 			state->playlist_index = song_index;
 			push_audio_event(AudioPlayerEventStateChanged);
 		} else if (res == PlayerResultPrevSong) {
 			if (--song_index < 0) {
-				song_index = 0;
+				song_index = (int)state->playlist_length - 1;
 			}
 			state->playlist_index = song_index;
 			push_audio_event(AudioPlayerEventStateChanged);
@@ -424,15 +437,15 @@ static void draw_player(const PlayerState *const state)
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 
-	// Playlist loop mode
-	snprintf(str_buf, 300, "Repeat playlist: %s", state->loop_playlist ? "enabled" : "disabled");
+	// Song playmode
+	snprintf(str_buf, 300, "Playing Mode: %s", playing_mode_str[state->playing_mode]);
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 
 	// Show volume
 	snprintf(str_buf, 300, "Volume: %d%%", audio_volume_get());
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
-	y += line_height + 10;
+	y += line_height + 3;
 
 	// Show Playing or paused/DAC on image
 	tf_draw_str(fb, ui_font_white, state->playing ? "Pause" : "Continue", (point_t){.x = 222, .y = y + 10});
@@ -448,6 +461,12 @@ static void draw_player(const PlayerState *const state)
 		      .big_endian = false};
 	blit(fb, (rect_t){.x = 10, .y = y, .width = img.width, .height = img.height - 1}, &img,
 	     (rect_t){.x = 0, .y = 1, .width = img.width, .height = img.height - 1});
+	y += img.height + 8;
+
+	// Explain start and stop button behaviour
+	tf_draw_str(fb, ui_font_white, "SELECT: Toggle screen, hold(>1s) & release for Keylock", (point_t){.x = 3, .y = y});
+	y += line_height + 3;
+	tf_draw_str(fb, ui_font_white, "START: Cycle through Playing Mode", (point_t){.x = 3, .y = y});
 
 	// TODO: Song position/duration?
 
@@ -539,7 +558,7 @@ static void handle_keypress(event_keypad_t keys, bool *quit)
 	case KEYPAD_START:
 		// Toggle playing mode
 		player_send_cmd(PlayerCmdToggleLoopMode);
-		settings_save(SettingPlaylistMode, player_state.loop_playlist);
+		settings_save(SettingPlayingMode, (int32_t)player_state.playing_mode);
 		break;
 	case KEYPAD_SELECT:
 		select_pressed = true;
@@ -630,8 +649,9 @@ static void free_playlist(PlayerState *state)
 static void load_settings(PlayerState *state)
 {
 	int32_t mode;
-	if (settings_load(SettingPlaylistMode, &mode) == 0) {
-		state->loop_playlist = mode ? true : false;
+	if (settings_load(SettingPlayingMode, &mode) == 0) {
+		if (mode >= 0 && mode <= PlayingModeMax)
+			state->playing_mode = (PlayingMode)mode;
 	}
 }
 
