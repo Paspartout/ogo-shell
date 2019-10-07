@@ -15,6 +15,7 @@
 #include <keypad.h>
 #include <tf.h>
 #include <ui.h>
+#include <str_utils.h>
 
 #include <audio_player.h>
 #include <image_viewer.h>
@@ -32,46 +33,15 @@ static struct FileBrowser {
 /** Number of entries that can be displayed at once. */
 static const int MAX_WIN_ENTRIES = 13;
 
-/** Truncate src to dst at the front.
- *  dst must be allocated with at least len bytes. */
-static void fruncate_path(char *dst, const char *src, const size_t len)
+static void draw_pathbar(const char *path, int selection, int n_entries)
 {
-	size_t i = strlen(src);
-	for (size_t j = len - 1; j > 2; j--) {
-		dst[j] = src[i--];
-	}
-	dst[0] = '.';
-	dst[1] = '.';
-	dst[2] = '.';
-	dst[len] = '\0';
-}
-
-static void ui_draw_pathbar(const char *path, int selection, int n_entries)
-{
-	fill_rectangle(fb, (rect_t){.x = 0, .y = 16, .width = DISPLAY_WIDTH, .height = 15}, 0xFFFF);
-
-	// Draw path
-	const char *path_str;
-	const int max_path_len = 40;
-	char path_buf[max_path_len + 1];
-	const size_t path_len = strlen(path);
-	// Eventually truncate path
-	if (path_len > max_path_len) {
-		fruncate_path(path_buf, path, max_path_len);
-		path_str = path_buf;
-	} else {
-		// use path directly
-		path_str = path;
-	}
-	tf_draw_str(fb, ui_font_black, path_str, (point_t){.x = 3, .y = 18});
-
-	// Draw selection and number of entries
+	char selection_str[16];
+	char *right = NULL;
 	if (n_entries > 0) {
-		char selection_str[16];
 		snprintf(selection_str, 16, "%d/%d", selection, n_entries);
-		const tf_metrics_t m = tf_get_str_metrics(ui_font_black, selection_str);
-		tf_draw_str(fb, ui_font_black, selection_str, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = 18});
+		right = selection_str;
 	}
+	ui_draw_pathbar(path, right, true);
 }
 
 // Print human readable representation of file size into dst
@@ -87,7 +57,7 @@ int sprint_human_size(char *dst, size_t strsize, off_t size)
 static void ui_draw_browser(void)
 {
 	// Draw Path
-	ui_draw_pathbar(browser.cwd, browser.selection + 1, browser.n_entries);
+	draw_pathbar(browser.cwd, browser.selection + 1, browser.n_entries);
 
 	// Show message if directory is empty
 	if (browser.n_entries == 0) {
@@ -120,7 +90,7 @@ static void ui_draw_browser(void)
 		char fname_buf[41];
 		char *filename;
 		if (strlen(entry->name) > 40) {
-			fruncate_path(fname_buf, entry->name, 40);
+			fruncate_str(fname_buf, entry->name, 40);
 			filename = fname_buf;
 		} else {
 			filename = entry->name;
@@ -293,7 +263,7 @@ static int browser_cd_up(void)
 
 #ifdef SIM
 #ifndef START_FOLDER
-#define START_FOLDER "/"
+#define START_FOLDER "/home/paspartout/mus"
 #endif
 #else
 #define START_FOLDER "/sdcard"

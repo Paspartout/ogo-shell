@@ -1,4 +1,5 @@
-CFLAGS := $(CFLAGS) -O2 -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
+CC := clang
+CFLAGS := $(CFLAGS) -O0 -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
 LDLIBS := -lSDL2 -lm
 
 # TODO: Header dependencies
@@ -14,6 +15,7 @@ SRC := ../main/src/main.o \
 	../main/src/image_viewer.o \
 	../main/src/ui.o \
 	../main/src/status_bar.o \
+	../main/src/str_utils.o \
 	../sim/hardware/display.o \
 	../sim/hardware/event.o \
 	../sim/hardware/keypad.o \
@@ -37,6 +39,8 @@ SRC := ../main/src/main.o \
 OBJ := ${SRC:.c=.o}
 
 all: $(TARGET)
+
+# LDFLAGS := -fsanitize=undefined -fno-omit-frame-pointer -fsanitize=address
 
 $(TARGET): ${OBJ}
 	@echo LD $@

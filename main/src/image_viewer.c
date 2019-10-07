@@ -56,17 +56,10 @@ static char error_buf[ERROR_BUF_SIZE];
 
 static void draw_pathbar(const char *filename, int width, int height)
 {
-	fill_rectangle(fb, (rect_t){.x = 0, .y = 16, .width = DISPLAY_WIDTH, .height = 15}, 0xFFFF);
-	tf_draw_str(fb, ui_font_black, filename, (point_t){.x = 3, .y = 18});
-
-	// Draw image size on rigth
-	if (width > 0 && height > 0) {
-		char size_str[32];
-		snprintf(size_str, 32, "%dx%d", width, height);
-		const tf_metrics_t m = tf_get_str_metrics(ui_font_black, size_str);
-		tf_draw_str(fb, ui_font_black, size_str, (point_t){.x = DISPLAY_WIDTH - m.width - 3, .y = 18});
-	}
-	display_update_rect((rect_t){.x = 0, .y = 16, .width = DISPLAY_WIDTH, .height = 16});
+	assert(filename != NULL);
+	char size_str[32];
+	snprintf(size_str, 32, "%dx%d", width, height);
+	ui_draw_pathbar(filename, size_str, false);
 }
 
 static int draw_image(const char *img_fullpath, const char *filename)

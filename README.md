@@ -47,7 +47,9 @@ You should be able to download the latest fw file from [Githubs releases][releas
 - A: Play/Pause
 - B: Close Song, Go back(Later: Continue playing in the background)
 - VOLUME: Switch DAC/Speaker
-- SELECT: Toggle display backlight for longer battery life
+- SELECT:
+        - Press shortly: Toggle display backlight for longer battery life
+        - Press for longer than one second: Toggle keylock and display
 - START: Toggle playlist playing mode(repeat playlist)
 - UP: Increase volume
 - DOWN: Decrease volume

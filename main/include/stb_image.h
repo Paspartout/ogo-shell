@@ -1054,7 +1054,7 @@ static stbi_uc *stbi__convert_16_to_8(stbi__uint16 *orig, int w, int h, int chan
    stbi_uc *reduced;
 
    reduced = (stbi_uc *) stbi__malloc(img_len);
-   if (reduced == NULL) return stbi__errpuc("outofmem", "Out of memory");
+   if (reduced == NULL) return stbi__errpuc("outofmem", "Image too large (no memory)");
 
    for (i = 0; i < img_len; ++i)
       reduced[i] = (stbi_uc)((orig[i] >> 8) & 0xFF); // top half of each byte is sufficient approx of 16->8 bit scaling
@@ -1070,7 +1070,7 @@ static stbi__uint16 *stbi__convert_8_to_16(stbi_uc *orig, int w, int h, int chan
    stbi__uint16 *enlarged;
 
    enlarged = (stbi__uint16 *) stbi__malloc(img_len*2);
-   if (enlarged == NULL) return (stbi__uint16 *) stbi__errpuc("outofmem", "Out of memory");
+   if (enlarged == NULL) return (stbi__uint16 *) stbi__errpuc("outofmem", "Image too large (no memory)");
 
    for (i = 0; i < img_len; ++i)
       enlarged[i] = (stbi__uint16)((orig[i] << 8) + orig[i]); // replicate to high and low byte, maps 0->0, 255->0xffff
@@ -1590,7 +1590,7 @@ static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int r
    good = (unsigned char *) stbi__malloc_mad3(req_comp, x, y, 0);
    if (good == NULL) {
       STBI_FREE(data);
-      return stbi__errpuc("outofmem", "Out of memory");
+      return stbi__errpuc("outofmem", "Image too large (no memory)");
    }
 
    for (j=0; j < (int) y; ++j) {
@@ -1639,7 +1639,7 @@ static stbi__uint16 *stbi__convert_format16(stbi__uint16 *data, int img_n, int r
    good = (stbi__uint16 *) stbi__malloc(req_comp * x * y * 2);
    if (good == NULL) {
       STBI_FREE(data);
-      return (stbi__uint16 *) stbi__errpuc("outofmem", "Out of memory");
+      return (stbi__uint16 *) stbi__errpuc("outofmem", "Image too large (no memory)");
    }
 
    for (j=0; j < (int) y; ++j) {
@@ -1679,7 +1679,7 @@ static float   *stbi__ldr_to_hdr(stbi_uc *data, int x, int y, int comp)
    float *output;
    if (!data) return NULL;
    output = (float *) stbi__malloc_mad4(x, y, comp, sizeof(float), 0);
-   if (output == NULL) { STBI_FREE(data); return stbi__errpf("outofmem", "Out of memory"); }
+   if (output == NULL) { STBI_FREE(data); return stbi__errpf("outofmem", "Image too large (no memory)"); }
    // compute number of non-alpha components
    if (comp & 1) n = comp; else n = comp-1;
    for (i=0; i < x*y; ++i) {
@@ -1705,7 +1705,7 @@ static stbi_uc *stbi__hdr_to_ldr(float   *data, int x, int y, int comp)
    stbi_uc *output;
    if (!data) return NULL;
    output = (stbi_uc *) stbi__malloc_mad3(x, y, comp, 0);
-   if (output == NULL) { STBI_FREE(data); return stbi__errpuc("outofmem", "Out of memory"); }
+   if (output == NULL) { STBI_FREE(data); return stbi__errpuc("outofmem", "Image too large (no memory)"); }
    // compute number of non-alpha components
    if (comp & 1) n = comp; else n = comp-1;
    for (i=0; i < x*y; ++i) {
@@ -3130,7 +3130,7 @@ static int stbi__process_frame_header(stbi__jpeg *z, int scan)
       z->img_comp[i].linebuf = NULL;
       z->img_comp[i].raw_data = stbi__malloc_mad2(z->img_comp[i].w2, z->img_comp[i].h2, 15);
       if (z->img_comp[i].raw_data == NULL)
-         return stbi__free_jpeg_components(z, i+1, stbi__err("outofmem", "Out of memory"));
+	 return stbi__free_jpeg_components(z, i+1, stbi__err("outofmem", "Image too large (no memory)"));
       // align blocks for idct using mmx/sse
       z->img_comp[i].data = (stbi_uc*) (((size_t) z->img_comp[i].raw_data + 15) & ~15);
       if (z->progressive) {
@@ -3139,7 +3139,7 @@ static int stbi__process_frame_header(stbi__jpeg *z, int scan)
          z->img_comp[i].coeff_h = z->img_comp[i].h2 / 8;
          z->img_comp[i].raw_coeff = stbi__malloc_mad3(z->img_comp[i].w2, z->img_comp[i].h2, sizeof(short), 15);
          if (z->img_comp[i].raw_coeff == NULL)
-            return stbi__free_jpeg_components(z, i+1, stbi__err("outofmem", "Out of memory"));
+	    return stbi__free_jpeg_components(z, i+1, stbi__err("outofmem", "Image too large (no memory)"));
          z->img_comp[i].coeff = (short*) (((size_t) z->img_comp[i].raw_coeff + 15) & ~15);
       }
    }
@@ -3673,7 +3673,7 @@ static stbi_uc *load_jpeg_image(stbi__jpeg *z, int *out_x, int *out_y, int *comp
          // allocate line buffer big enough for upsampling off the edges
          // with upsample factor of 4
          z->img_comp[k].linebuf = (stbi_uc *) stbi__malloc(z->s->img_x + 3);
-         if (!z->img_comp[k].linebuf) { stbi__cleanup_jpeg(z); return stbi__errpuc("outofmem", "Out of memory"); }
+	 if (!z->img_comp[k].linebuf) { stbi__cleanup_jpeg(z); return stbi__errpuc("outofmem", "Image too large (no memory)"); }
 
          r->hs      = z->img_h_max / z->img_comp[k].h;
          r->vs      = z->img_v_max / z->img_comp[k].v;
@@ -3691,7 +3691,7 @@ static stbi_uc *load_jpeg_image(stbi__jpeg *z, int *out_x, int *out_y, int *comp
 
       // can't error after this so, this is safe
       output = (stbi_uc *) stbi__malloc_mad3(n, z->s->img_x, z->s->img_y, 1);
-      if (!output) { stbi__cleanup_jpeg(z); return stbi__errpuc("outofmem", "Out of memory"); }
+      if (!output) { stbi__cleanup_jpeg(z); return stbi__errpuc("outofmem", "Image too large (no memory)"); }
 
       // now go ahead and resample
       for (j=0; j < z->s->img_y; ++j) {
@@ -4021,7 +4021,7 @@ static int stbi__zexpand(stbi__zbuf *z, char *zout, int n)  // need to make room
       limit *= 2;
    q = (char *) STBI_REALLOC_SIZED(z->zout_start, old_limit, limit);
    STBI_NOTUSED(old_limit);
-   if (q == NULL) return stbi__err("outofmem", "Out of memory");
+   if (q == NULL) return stbi__err("outofmem", "Image too large (no memory)");
    z->zout_start = q;
    z->zout       = q + cur;
    z->zout_end   = q + limit;
@@ -4409,7 +4409,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
 
    STBI_ASSERT(out_n == s->img_n || out_n == s->img_n+1);
    a->out = (stbi_uc *) stbi__malloc_mad3(x, y, output_bytes, 0); // extra bytes to write off the end into
-   if (!a->out) return stbi__err("outofmem", "Out of memory");
+   if (!a->out) return stbi__err("outofmem", "Image too large (no memory)");
 
    if (!stbi__mad3sizes_valid(img_n, x, depth, 7)) return stbi__err("too large", "Corrupt PNG");
    img_width_bytes = (((img_n * x * depth) + 7) >> 3);
@@ -4530,7 +4530,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
          stbi_uc scale = (color == 0) ? stbi__depth_scale_table[depth] : 1; // scale grayscale values to 0..255 range
 
          // note that the final byte might overshoot and write more data than desired.
-         // we can allocate enough data that this never writes out of memory, but it
+	 // we can allocate enough data that this never writes Image too large (no memory), but it
          // could also overwrite the next scanline. can it overwrite non-empty data
          // on the next scanline? yes, consider 1-pixel-wide scanlines with 1-bit-per-pixel.
          // so we need to explicitly clamp the final ones
@@ -4706,7 +4706,7 @@ static int stbi__expand_png_palette(stbi__png *a, stbi_uc *palette, int len, int
    stbi_uc *p, *temp_out, *orig = a->out;
 
    p = (stbi_uc *) stbi__malloc_mad2(pixel_count, pal_img_n, 0);
-   if (p == NULL) return stbi__err("outofmem", "Out of memory");
+   if (p == NULL) return stbi__err("outofmem", "Image too large (no memory)");
 
    // between here and free(out) below, exitting would leak
    temp_out = p;
@@ -4897,7 +4897,7 @@ static int stbi__parse_png_file(stbi__png *z, int scan, int req_comp)
                while (ioff + c.length > idata_limit)
                   idata_limit *= 2;
                STBI_NOTUSED(idata_limit_old);
-               p = (stbi_uc *) STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return stbi__err("outofmem", "Out of memory");
+	       p = (stbi_uc *) STBI_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return stbi__err("outofmem", "Image too large (no memory)");
                z->idata = p;
             }
             if (!stbi__getn(s, z->idata+ioff,c.length)) return stbi__err("outofdata","Corrupt PNG");
@@ -5252,7 +5252,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
       return stbi__errpuc("too large", "Corrupt BMP");
 
    out = (stbi_uc *) stbi__malloc_mad3(target, s->img_x, s->img_y, 0);
-   if (!out) return stbi__errpuc("outofmem", "Out of memory");
+   if (!out) return stbi__errpuc("outofmem", "Image too large (no memory)");
    if (info.bpp < 16) {
       int z=0;
       if (psize == 0 || psize > 256) { STBI_FREE(out); return stbi__errpuc("invalid", "Corrupt BMP"); }
@@ -5578,7 +5578,7 @@ static void *stbi__tga_load(stbi__context *s, int *x, int *y, int *comp, int req
       return stbi__errpuc("too large", "Corrupt TGA");
 
    tga_data = (unsigned char*)stbi__malloc_mad3(tga_width, tga_height, tga_comp, 0);
-   if (!tga_data) return stbi__errpuc("outofmem", "Out of memory");
+   if (!tga_data) return stbi__errpuc("outofmem", "Image too large (no memory)");
 
    // skip to the data's starting position (offset usually = 0)
    stbi__skip(s, tga_offset );
@@ -5599,7 +5599,7 @@ static void *stbi__tga_load(stbi__context *s, int *x, int *y, int *comp, int req
          tga_palette = (unsigned char*)stbi__malloc_mad2(tga_palette_len, tga_comp, 0);
          if (!tga_palette) {
             STBI_FREE(tga_data);
-            return stbi__errpuc("outofmem", "Out of memory");
+	    return stbi__errpuc("outofmem", "Image too large (no memory)");
          }
          if (tga_rgb16) {
             stbi_uc *pal_entry = tga_palette;
@@ -5848,7 +5848,7 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
    } else
       out = (stbi_uc *) stbi__malloc(4 * w*h);
 
-   if (!out) return stbi__errpuc("outofmem", "Out of memory");
+   if (!out) return stbi__errpuc("outofmem", "Image too large (no memory)");
    pixelCount = w*h;
 
    // Initialize the data to zero.
@@ -6430,7 +6430,7 @@ static stbi_uc *stbi__gif_load_next(stbi__context *s, stbi__gif *g, int *comp, i
       g->background = (stbi_uc *) stbi__malloc(4 * pcount);
       g->history = (stbi_uc *) stbi__malloc(pcount);
       if (!g->out || !g->background || !g->history)
-         return stbi__errpuc("outofmem", "Out of memory");
+	 return stbi__errpuc("outofmem", "Image too large (no memory)");
 
       // image is treated as "transparent" at the start - ie, nothing overwrites the current background; 
       // background colour is only used for pixels that are not rendered first frame, after that "background"
@@ -6808,7 +6808,7 @@ static float *stbi__hdr_load(stbi__context *s, int *x, int *y, int *comp, int re
    // Read data
    hdr_data = (float *) stbi__malloc_mad4(width, height, req_comp, sizeof(float), 0);
    if (!hdr_data)
-      return stbi__errpf("outofmem", "Out of memory");
+      return stbi__errpf("outofmem", "Image too large (no memory)");
 
    // Load image data
    // image data is stored as some number of sca
@@ -6851,7 +6851,7 @@ static float *stbi__hdr_load(stbi__context *s, int *x, int *y, int *comp, int re
             scanline = (stbi_uc *) stbi__malloc_mad2(width, 4, 0);
             if (!scanline) {
                STBI_FREE(hdr_data);
-               return stbi__errpf("outofmem", "Out of memory");
+	       return stbi__errpf("outofmem", "Image too large (no memory)");
             }
          }
 
@@ -7118,7 +7118,7 @@ static void *stbi__pnm_load(stbi__context *s, int *x, int *y, int *comp, int req
       return stbi__errpuc("too large", "PNM too large");
 
    out = (stbi_uc *) stbi__malloc_mad3(s->img_n, s->img_x, s->img_y, 0);
-   if (!out) return stbi__errpuc("outofmem", "Out of memory");
+   if (!out) return stbi__errpuc("outofmem", "Image too large (no memory)");
    stbi__getn(s, out, s->img_n * s->img_x * s->img_y);
 
    if (req_comp && req_comp != s->img_n) {

@@ -4,6 +4,7 @@
 
 #include <SDL2/SDL.h>
 
+// TODO: Support for multikeypresses
 // Map the sdl keycode to odroid keypad enum/constant/flag
 static uint16_t map_sdl_keysym(int keycode)
 {
@@ -62,7 +63,10 @@ int wait_event(event_t *event)
 		case SDL_KEYDOWN:
 			event->type = EVENT_TYPE_KEYPAD;
 			event->keypad.released = 0;
-			event->keypad.pressed = map_sdl_keysym(e.key.keysym.sym);
+			if (!e.key.repeat)
+				event->keypad.pressed = map_sdl_keysym(e.key.keysym.sym);
+			else
+				event->keypad.pressed = 0;
 			break;
 		case SDL_KEYUP:
 			event->type = EVENT_TYPE_KEYPAD;

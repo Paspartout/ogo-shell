@@ -13,10 +13,12 @@
 #include <ui.h>
 #include <settings.h>
 #include <guide_img.c>
+#include <system.h>
 
 #include <limits.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #ifndef SIM
 #include <freertos/FreeRTOS.h>
@@ -32,7 +34,6 @@
 #include <acodecs.h>
 
 // TODO: Move these
-static bool backlight = true;
 static AudioCodec choose_codec(FileType ftype)
 {
 	switch (ftype) {
@@ -90,6 +91,8 @@ typedef struct PlayerState {
 static PlayerState player_state = {
     0,
 };
+static bool keys_locked = false;
+static bool backlight_on = true;
 
 // These need to be implemented for SDL/FreeRTOS seperately
 static PlayerCmd player_poll_cmd(void);
@@ -409,19 +412,15 @@ static void draw_player(const PlayerState *const state)
 
 	const int line_height = 16;
 	short y = 34;
-	tf_draw_str(fb, ui_font_white, "Audio Player", (point_t){.x = 3, .y = y});
-	y += line_height;
 
 	char str_buf[300];
 	Song *song = &state->playlist[state->playlist_index];
 
+	snprintf(str_buf, 300, "%d/%d", state->playlist_index + 1, (int)state->playlist_length);
+	ui_draw_pathbar("Audio Player", str_buf, false);
+
 	// Song name
 	snprintf(str_buf, 300, "Song: %s", song->filename);
-	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
-	y += line_height;
-
-	// Playlist position
-	snprintf(str_buf, 300, "Playlist: %d/%d", state->playlist_index + 1, (int)state->playlist_length);
 	tf_draw_str(fb, ui_font_white, str_buf, (point_t){.x = 3, .y = y});
 	y += line_height;
 
@@ -455,9 +454,57 @@ static void draw_player(const PlayerState *const state)
 	display_update_rect(window_rect);
 }
 
-static void handle_keypress(uint16_t keys, bool *quit)
+/// Calculate the difference between two timespecs in milliseconds
+static uint64_t ts_diff_ms(const struct timespec ts1, const struct timespec ts2)
 {
-	switch (keys) {
+	const uint64_t ts1_ms = ts1.tv_sec * (uint64_t)1000 + ts1.tv_nsec / (uint64_t)1000000;
+	const uint64_t ts2_ms = ts2.tv_sec * (uint64_t)1000 + ts2.tv_nsec / (uint64_t)1000000;
+	return ts2_ms - ts1_ms;
+}
+
+static void handle_keypress(event_keypad_t keys, bool *quit)
+{
+	static struct timespec menu_pressed_start, tmp;
+	static bool select_pressed = false;
+	if (keys.released) {
+		if ((keys.released & KEYPAD_SELECT) && select_pressed) {
+			clock_gettime(CLOCK_MONOTONIC, &tmp);
+			const uint64_t diff = ts_diff_ms(menu_pressed_start, tmp);
+
+			if (keys_locked) {
+				if (diff > 1000) {
+					system_led_set(true);
+					usleep(100 * 1000);
+					system_led_set(false);
+					keys_locked = !keys_locked;
+					backlight_on = !keys_locked;
+				}
+			} else {
+				if (backlight_on && diff > 1000) {
+					system_led_set(true);
+					usleep(100 * 1000);
+					system_led_set(false);
+					keys_locked = !keys_locked;
+					backlight_on = !keys_locked;
+				} else {
+					backlight_on = !backlight_on;
+				}
+			}
+
+			select_pressed = false;
+			backlight_percentage_set(backlight_on ? 50 : 0);
+		}
+	}
+
+	if (keys_locked) {
+		if (keys.pressed & KEYPAD_SELECT) {
+			select_pressed = true;
+			clock_gettime(CLOCK_MONOTONIC, &menu_pressed_start);
+		}
+		return;
+	}
+
+	switch (keys.pressed) {
 	case KEYPAD_A:
 		player_send_cmd(PlayerCmdPause);
 		break;
@@ -495,13 +542,19 @@ static void handle_keypress(uint16_t keys, bool *quit)
 		settings_save(SettingPlaylistMode, player_state.loop_playlist);
 		break;
 	case KEYPAD_SELECT:
-		backlight = !backlight;
-		backlight_percentage_set(backlight ? 50 : 0);
+		select_pressed = true;
+		clock_gettime(CLOCK_MONOTONIC, &menu_pressed_start);
 		break;
-	default:
-		// TODO: Bubble up to parent
+	case KEYPAD_MENU:
+		// TODO: Show future system menu
 		break;
 	} // switch(event.keypad.pressed)
+
+	if (!backlight_on) {
+		system_led_set(true);
+		usleep(100 * 1000);
+		system_led_set(false);
+	}
 }
 
 #define MAX_SONGS 1024
@@ -604,7 +657,7 @@ int audio_player(AudioPlayerParam params)
 		}
 		switch (event.type) {
 		case EVENT_TYPE_KEYPAD:
-			handle_keypress(event.keypad.pressed, &quit);
+			handle_keypress(event.keypad, &quit);
 			break;
 		case EVENT_TYPE_AUDIO_PLAYER:
 			if (event.audio_player.event == AudioPlayerEventDone) {
@@ -627,7 +680,7 @@ int audio_player(AudioPlayerParam params)
 
 	player_terminate();
 	free_playlist(&player_state);
-	backlight = true;
+	keys_locked = false;
 	backlight_percentage_set(50);
 
 	return 0;

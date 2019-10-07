@@ -16,5 +16,8 @@ extern tf_t *ui_font_white;
 void ui_init(void);
 /// Free ui resources
 void ui_free(void);
+
 /// Display an error message
 void ui_message_error(const char *msg);
+/// Draw the pathbar that is located under the status bar
+void ui_draw_pathbar(const char *left, const char *right, bool fruncate);

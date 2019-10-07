@@ -134,21 +134,23 @@ v0.2 - Basic music playing capabilities
 	- [x] Build and upload firmware
 	- [x] Move all known issues and features to GitHub?
 
-v0.3 - Bugfixes, Image viewer and Chiptunes!
---------------------------------------------
+v1.0 - Keylock, Bugfixes and an Image viewer and Chiptunes!
+-----------------------------------------------------------
 
 - [x] Simple image viewer(for small images)
-- [ ] Keylock when screen is off?
-    - [ ] How to unlock
+- [x] Keylock when screen is off?
+- [ ] Update guide image
+- [ ] Song repeat mode?
+- [ ] Toggle fullscreen in imageviewer using select
 - [ ] Bugfixes and minor improvements
     - [ ] Mono file playback
+
+v1.1 - Chiptunes!
+-----------------
+
 - [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
 
-### Maybe
-
-- [ ] Optimize image loading to use less memory in order to open larger images
-
-v0.4 - Polishing/UI Revamp
+v2.0 - Polishing/UI Revamp
 --------------------------
 
 - [ ] Speaker/DAC in Statusbar
@@ -190,6 +192,8 @@ Ideas for future versions(maybe)
 - [ ] More Audio codecs
 	- [ ] AAC - License Isuses?
 	- [ ] OPUS - Library small and fast enough?
+
+- [ ] Optimize image loading to use less memory in order to open larger images
 
 - [ ] Bluetooh Audio Streaming
 - [ ] Musical Alarm Clock with NTP Time Sync
