@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -60,7 +61,7 @@ static int app_init(void)
 
 	// Setup sdcard and display error message on failure
 	// TODO: Make it nonfatal so user can still browse SPIFFS or so
-	if ((sdcard_init("/sdcard")) != 0) {
+	if ((sdcard_init("/sd")) != 0) {
 		ui_message_error("SDCARD ERROR: Please insert the sdcard and restart the device.");
 		event_t ev;
 		for (;;) {
@@ -85,6 +86,13 @@ static void app_shutdown(void)
 	system_reboot_to_firmware();
 }
 
+#ifdef SIM
+static char start_dir_buf[PATH_MAX];
+static char *start_dir = start_dir_buf;
+#else
+#define start_dir "/sd/"
+#endif
+
 void app_main_task(void *arg)
 {
 	if (app_init() != 0) {
@@ -95,7 +103,7 @@ void app_main_task(void *arg)
 	status_bar_draw();
 	status_bar_start();
 
-	file_browser();
+	file_browser((FileBrowserParam) {.cwd = start_dir});
 
 	app_shutdown();
 }
@@ -113,6 +121,16 @@ void app_main(void)
 
 int main(int argc, char const *argv[])
 {
+	if (argc > 1) {
+		if (realpath(argv[1], (char*)&start_dir_buf) == NULL) {
+			perror("Could not resolve start path");
+			start_dir = start_dir_buf;
+			return -1;
+		}
+	} else {
+		start_dir = "/home/";
+	}
+
 	app_main();
 	return 0;
 }

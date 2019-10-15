@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include <file_browser.h>
+
 #include <display.h>
 
 // Application level code
@@ -16,9 +18,15 @@
 #include <tf.h>
 #include <ui.h>
 #include <str_utils.h>
+#include <settings.h>
 
 #include <audio_player.h>
 #include <image_viewer.h>
+#include <emulator_launcher.h>
+
+#ifndef SIM
+#include <esp_system.h>
+#endif
 
 /* Global state. */
 static struct FileBrowser {
@@ -261,14 +269,6 @@ static int browser_cd_up(void)
 	return browser_cd(new_cwd);
 }
 
-#ifdef SIM
-#ifndef START_FOLDER
-#define START_FOLDER "/home/paspartout/mus"
-#endif
-#else
-#define START_FOLDER "/sdcard"
-#endif
-
 static void open_file(Entry *entry)
 {
 	// TODO: Proper File handlers
@@ -277,17 +277,72 @@ static void open_file(Entry *entry)
 		audio_player((AudioPlayerParam){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd, true});
 	} else if (ftype == FileTypeJPEG || ftype == FileTypePNG || ftype == FileTypeBMP || ftype == FileTypeGIF) {
 		image_viewer((ImageViewerParams){browser.cwd_entries, browser.n_entries, browser.selection, browser.cwd});
+	} else if (ftype == FileTypeGB || ftype == FileTypeGBC || ftype == FileTypeNES || ftype == FileTypeGG || ftype == FileTypeCOL ||
+		   ftype == FileTypeSMS) {
+		emulator_launcher((EmulatorLauncherParam){.entry = &browser.cwd_entries[browser.selection],
+							  .rom_filetype = ftype,
+							  .cwd = browser.cwd,
+							  .fb_selection = browser.selection,
+							  .fb_scroll = browser.scroll});
 	} else {
 		ui_draw_details(entry, browser.cwd);
 	}
 }
 
-int file_browser(void)
+static int browser_load_settings(void)
+{
+#ifndef SIM
+	esp_reset_reason_t reason = esp_reset_reason();
+	fprintf(stderr, "reset reason: %d\n", reason);
+	if (reason != ESP_RST_SW) {
+		settings_save(SettingLastSelection, -1);
+		return -2;
+	}
+#endif
+
+	char last_path[PATH_MAX];
+	int32_t last_selection, last_scroll;
+
+	// Try to load last selection and invaildate it afterwards
+	if (settings_load(SettingLastSelection, &last_selection)) {
+		return -1;
+	}
+	if (last_selection < 0) {
+		return -1;
+	}
+	if (settings_load_str(SettingLastPath, last_path, PATH_MAX) != 0) {
+		return -1;
+	}
+	if (settings_load(SettingLastScroll, &last_scroll) != 0) {
+		return -1;
+	}
+
+	printf("Loading last path %s with selection %d and scroll %d\n", last_path, last_selection, last_scroll);
+	if (browser_cd(last_path) != 0) {
+		settings_save(SettingLastSelection, -1);
+		return -1;
+	}
+	strncpy(browser.cwd, last_path, PATH_MAX);
+	if (last_selection < browser.n_entries) {
+		browser.selection = last_selection;
+		if (last_scroll < browser.n_entries) {
+			browser.scroll = last_scroll;
+		}
+	}
+
+	settings_save(SettingLastSelection, -1);
+
+	return 0;
+}
+
+int file_browser(FileBrowserParam params)
 {
 	bool quit = false;
 	event_t event;
 
-	browser_init(START_FOLDER);
+	browser_init(params.cwd);
+	browser_load_settings();
+
 	browser.n_entries = fops_list_dir(&browser.cwd_entries, browser.cwd);
 	if (browser.n_entries < 0) {
 		browser.n_entries = 0;

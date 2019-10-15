@@ -26,6 +26,13 @@ typedef enum FileType {
 	FileTypePNG,
 	FileTypeGIF,
 	FileTypeBMP,
+
+	FileTypeNES,
+	FileTypeGB,
+	FileTypeGBC,
+	FileTypeSMS,
+	FileTypeCOL,
+	FileTypeGG,
 } FileType;
 
 /** List all entries of given cwd without fetching file properties. */

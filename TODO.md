@@ -145,35 +145,39 @@ v0.3 - Image viewer and Keylock
 - [x] Update readme
 - [ ] Release
 
-v1.1 - Chiptunes!
------------------
+v0.4 - Chiptunes and optional Emulators
+---------------------------------------
 
 - [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
 - [ ] Bugfixes and minor improvements
-    - [ ] Mono file playback
+        - [ ] Mono file playback
+        - [ ] Remember old selection_pos when going back
+        - [ ] Show longer filenames when filesize is hidden
+        - [ ] Wrap around selection if hitting boundaries?
 
-v2.0 - Polishing/UI Revamp
+v1.0 - Polishing/UI Revamp
 --------------------------
+
+- [ ] polished odroid-go api/drivers: ogo-hal
+        - [ ] Better error handling
+        - [ ] Simulation using SDL
+        - [ ] Documentation using read-the-docs
 
 - [ ] Speaker/DAC in Statusbar
 - [ ] UI/Window System:
-		- [ ] Windows/Apps
-		- [ ] Event bubbling
+            - [ ] Windows/Apps
+            - [ ] Event bubbling
 - [ ] Figure out a plan for error handling that allows displaying on lcd
 - [ ] Icons instead of f and d
 	- [ ] Create icon font
 		- [ ] File, Directory, Music File
 		- [ ] Battery, Headphones, Speaker, Settings, ...
 		- [ ] Buttons (A) (B) for Help texts
-- [ ] Remember old selection_pos when going back
-- [ ] Wrap around selection if hitting boundaries?
 
 - [ ] Audio Player++
-	- [ ] Fix mono files playback
 	- [ ] New Theme?
 	- [ ] Seeking
 	- [ ] Show Song Position/Song Length
-	- [ ] Repeat song
 	- [ ] Shuffle Playlist
 	- [ ] Play .m3u/playlist files?
 	- [ ] Minimize Player for multi tasking
@@ -204,8 +208,3 @@ Ideas for future versions(maybe)
 - [ ] Show sdcard statistics using [getfree](http://elm-chan.org/fsw/ff/doc/getfree.html)
 - [ ] Act as an emulator launcher to launch rom files
 - [ ] Maybe even become a firmware that can install and launch *.fw files
-
-- [ ] Odroid API Work?
-	- [ ] Better error handling
-	- [ ] Simulation
-	- [ ] Docs?

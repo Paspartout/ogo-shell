@@ -1,17 +1,17 @@
-From 736b2bb8ae3c594867724c9a25410709dbfc2aa1 Mon Sep 17 00:00:00 2001
+From f17a02e55be79ccbd9e9f8c6ce7a53f15f0d8441 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Phileas=20V=C3=B6cking?= <paspartout@fogglabs.de>
 Date: Fri, 27 Sep 2019 20:57:35 +0200
 Subject: [PATCH] sdcard: lock/unlock mutex for odroid spi bus
 
 ---
- components/driver/sdspi_transaction.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ components/driver/sdspi_transaction.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/components/driver/sdspi_transaction.c b/components/driver/sdspi_transaction.c
-index d25521dea..961ace3ca 100644
+index d25521dea..f500f2160 100644
 --- a/components/driver/sdspi_transaction.c
 +++ b/components/driver/sdspi_transaction.c
-@@ -23,12 +23,15 @@
+@@ -23,12 +23,17 @@
  #include "driver/sdmmc_host.h"
  #include "sdspi_private.h"
  #include "sdspi_crc.h"
@@ -22,24 +22,31 @@ index d25521dea..961ace3ca 100644
  static _lock_t s_lock;
  static bool s_app_cmd;
  
++#ifdef ODROID_GO_SPI_MUTEX
 +extern SemaphoreHandle_t odroid_spi_mutex;
++#endif
 +
  static uint8_t sdspi_msg_crc7(sdspi_hw_cmd_t* hw_cmd)
  {
      const size_t bytes_to_crc = offsetof(sdspi_hw_cmd_t, arguments) +
-@@ -81,6 +84,7 @@ static void r1_response_to_err(uint8_t r1, int cmd, esp_err_t *out_err)
+@@ -81,6 +86,10 @@ static void r1_response_to_err(uint8_t r1, int cmd, esp_err_t *out_err)
  
  esp_err_t sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo)
  {
++
++#ifdef ODROID_GO_SPI_MUTEX
 +	xSemaphoreTake(odroid_spi_mutex, portMAX_DELAY);
++#endif
      _lock_acquire(&s_lock);
      // Convert the command to wire format
      sdspi_hw_cmd_t hw_cmd;
-@@ -141,5 +145,6 @@ esp_err_t sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo)
+@@ -141,5 +150,8 @@ esp_err_t sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo)
          s_app_cmd = false;
      }
      _lock_release(&s_lock);
++#ifdef ODROID_GO_SPI_MUTEX
 +	xSemaphoreGive(odroid_spi_mutex);
++#endif
      return ret;
  }
 -- 

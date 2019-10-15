@@ -157,6 +157,18 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeBMP;
 	} else if (!strncasecmp("gif", &filename[len - 3], 3)) {
 		return FileTypeGIF;
+	} else if (!strncasecmp("gb", &filename[len - 2], 2)) {
+		return FileTypeGB;
+	} else if (!strncasecmp("gbc", &filename[len - 3], 3)) {
+		return FileTypeGBC;
+	} else if (!strncasecmp("sms", &filename[len - 3], 3)) {
+		return FileTypeSMS;
+	} else if (!strncasecmp("nes", &filename[len - 3], 3)) {
+		return FileTypeNES;
+	} else if (!strncasecmp("col", &filename[len - 3], 3)) {
+		return FileTypeCOL;
+	} else if (!strncasecmp("gg", &filename[len - 2], 2)) {
+		return FileTypeGG;
 	}
 
 	return FileTypeNone;

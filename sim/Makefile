@@ -15,6 +15,7 @@ SRC := ../main/src/main.o \
 	../main/src/file_browser.o \
 	../main/src/audio_player.o \
 	../main/src/image_viewer.o \
+	../main/src/emulator_launcher.o \
 	../main/src/ui.o \
 	../main/src/status_bar.o \
 	../main/src/str_utils.o \
@@ -24,19 +25,19 @@ SRC := ../main/src/main.o \
 	../sim/hardware/backlight.o \
 	../sim/hardware/system.o \
 	../sim/hardware/sdcard.o \
-        ../sim/hardware/audio.o \
-        ../sim/hardware/battery.o \
-        ../sim/hardware/settings.o \
-        ../components/acodecs/src/acodecs.o \
-        ../components/acodecs/src/stb_vorbis.o \
+	../sim/hardware/audio.o \
+	../sim/hardware/battery.o \
+	../sim/hardware/settings.o \
+	../components/acodecs/src/acodecs.o \
+	../components/acodecs/src/stb_vorbis.o \
 	../components/acodecs/src/dr_mp3.o \
 	../components/acodecs/src/dr_wav.o \
 	../components/acodecs/src/dr_flac.o \
 	../components/hardware/src/gbuf.o \
 	../components/graphics/graphics.o \
 	../components/graphics/tf.o \
-        ../components/graphics/OpenSans_Regular_11X12.o \
-        $(LIBXM_SRC)
+	../components/graphics/OpenSans_Regular_11X12.o \
+	$(LIBXM_SRC)
 
 OBJ := ${SRC:.c=.o}
 
