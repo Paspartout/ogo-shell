@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /** The audiocodec to be decoded. */
 typedef enum AudioCodec {
@@ -10,14 +11,13 @@ typedef enum AudioCodec {
 	AudioCodecMOD,
 	AudioCodecWAV,
 	AudioCodecFLAC,
+	AudioCodecGME,
 } AudioCodec;
 
 typedef struct AudioInfo {
 	unsigned sample_rate;
 	unsigned channels;
 	unsigned buf_size;
-
-	// TODO: Add more?
 } AudioInfo;
 
 /** An AudioDecoder provides audio decoding functionality given a filename. */

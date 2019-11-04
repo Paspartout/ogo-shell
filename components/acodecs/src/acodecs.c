@@ -11,6 +11,7 @@
 #include <xmp.h>
 #include <dr_wav.h>
 #include <dr_flac.h>
+#include <gme.h>
 
 static int acodec_mp3_open(void **handle, const char *filename);
 static int acodec_mp3_get_info(void *handle, AudioInfo *info);
@@ -36,6 +37,11 @@ static int acodec_drflac_open(void **handle, const char *filename);
 static int acodec_drflac_get_info(void *handle, AudioInfo *info);
 static int acodec_drflac_decode(void *handle, int16_t *buf_out, int num_c, unsigned len);
 static int acodec_drflac_close(void *handle);
+
+static int acodec_gme_open(void **handle, const char *filename);
+static int acodec_gme_get_info(void *handle, AudioInfo *info);
+static int acodec_gme_decode(void *handle, int16_t *buf_out, int num_c, unsigned len);
+static int acodec_gme_close(void *handle);
 
 static AudioDecoder mp3_decoder = {
     .open = acodec_mp3_open,
@@ -72,6 +78,13 @@ static AudioDecoder drflac_decoder = {
     .close = acodec_drflac_close,
 };
 
+static AudioDecoder gme_decoder = {
+    .open = acodec_gme_open,
+    .get_info = acodec_gme_get_info,
+    .decode = acodec_gme_decode,
+    .close = acodec_gme_close,
+};
+
 // TODO: Add function that describes the error
 static int acodec_error = 0;
 
@@ -88,6 +101,8 @@ AudioDecoder *acodec_get_decoder(AudioCodec codec)
 		return &drwav_decoder;
 	case AudioCodecFLAC:
 		return &drflac_decoder;
+	case AudioCodecGME:
+		return &gme_decoder;
 	default:
 		return NULL;
 	}
@@ -336,5 +351,56 @@ static int acodec_drflac_close(void *handle)
 
 	drflac_close(flac);
 
+	return 0;
+}
+
+/* ---------------------------------------------------------- */
+/* game-music-emu(gme) for chiptunes */
+/* ---------------------------------------------------------- */
+
+#define GME_SAMPLERATE 44100
+
+static int acodec_gme_open(void **handle, const char *filename)
+{
+	Music_Emu *emu;
+	gme_err_t err;
+	if ((err = gme_open_file(filename, &emu, GME_SAMPLERATE)) != NULL) {
+		fprintf(stderr, "error opening gme file: %s\n", err);
+		return -1;
+	}
+	if ((err = gme_start_track(emu, 0)) != NULL) {
+		fprintf(stderr, "error starting track: %s\n", err);
+		return -1;
+	}
+
+	*handle = emu;
+
+	return 0;
+}
+
+static int acodec_gme_get_info(void *handle, AudioInfo *info)
+{
+	(void)handle;
+	info->channels = 2;
+	info->sample_rate = GME_SAMPLERATE;
+	info->buf_size = WAV_BUFSZ;
+
+	return 0;
+}
+
+static int acodec_gme_decode(void *handle, int16_t *buf_out, int num_c, unsigned len)
+{
+	(void)num_c;
+	Music_Emu *emu = (Music_Emu *)handle;
+	if (gme_play(emu, (int)len, buf_out) != NULL) {
+		return -1;
+	}
+
+	return gme_track_ended(emu) ? 0 : (int)len / 2;;
+}
+
+static int acodec_gme_close(void *handle)
+{
+	gme_delete(handle);
 	return 0;
 }

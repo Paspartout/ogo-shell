@@ -1,7 +1,7 @@
 CC := clang
-CFLAGS := $(CFLAGS) -O0 -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
-
-CFLAGS += -fsanitize=address
+CXX := clang++
+CFLAGS := $(CFLAGS) -Os -g -I ../components/hardware/include -I ../components/graphics -I ../main/include -I ../components/acodecs/include -I ../components/acodecs/src/xmplite -I ../components/acodecs/src/gme/gme `sdl2-config --cflags` -DSIM=1 -Wall -DLIBXMP_CORE_PLAYER
+CXXFLAGS := -DVGM_YM2612_NUKED
 LDLIBS := -lSDL2 -lm
 
 # TODO: Header dependencies
@@ -9,6 +9,7 @@ LDLIBS := -lSDL2 -lm
 TARGET := ogo-shell
 
 LIBXM_SRC := $(wildcard ../components/acodecs/src/xmplite/*.c) $(wildcard ../components/acodecs/src/xmplite/loaders/*.c)
+GME_SRC := $(wildcard ../components/acodecs/src/gme/gme/*.cpp)
 
 SRC := ../main/src/main.o \
 	../main/src/file_ops.o \
@@ -37,17 +38,21 @@ SRC := ../main/src/main.o \
 	../components/graphics/graphics.o \
 	../components/graphics/tf.o \
 	../components/graphics/OpenSans_Regular_11X12.o \
-	$(LIBXM_SRC)
+	$(LIBXM_SRC) \
 
-OBJ := ${SRC:.c=.o}
+OBJ := ${SRC:.c=.o} ${GME_SRC:.cpp=.o}
 
 all: $(TARGET)
 
-LDFLAGS := -fsanitize=undefined -fno-omit-frame-pointer -fsanitize=address
+# LDFLAGS := -fsanitize=undefined -fno-omit-frame-pointer -fsanitize=address
+
+
+obj:
+	echo ${OBJ}
 
 $(TARGET): ${OBJ}
 	@echo LD $@
-	@${CC} ${LDFLAGS} -o $@ $^ ${LDLIBS}
+	@${CXX} ${LDFLAGS} -o $@ $^ ${LDLIBS}
 
 clean:
 	rm -f ${TARGET} ${OBJ}

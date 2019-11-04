@@ -143,12 +143,19 @@ v0.3 - Image viewer and Keylock
 - [x] Song repeat mode
 - [x] Toggle fullscreen in imageviewer using select
 - [x] Update readme
-- [ ] Release
+- [x] Release
 
 v0.4 - Chiptunes and optional Emulators
 ---------------------------------------
 
-- [ ] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
+- [x] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
+	- [x] Implement all the other formats/file endings
+	- [x] Adapt README.md
+	- [ ] m3u/multi track support
+- [ ] Optional emulators
+	- [x] Document building
+	- [ ] Adapt colorsheme and center on screen menu?
+	- [ ] Add confirmation dialog when quitting without saving state
 - [ ] Bugfixes and minor improvements
         - [ ] Mono file playback
         - [ ] Remember old selection_pos when going back
@@ -158,6 +165,7 @@ v0.4 - Chiptunes and optional Emulators
 v1.0 - Polishing/UI Revamp
 --------------------------
 
+- [ ] Bookmark function
 - [ ] polished odroid-go api/drivers: ogo-hal
         - [ ] Better error handling
         - [ ] Simulation using SDL
@@ -208,3 +216,4 @@ Ideas for future versions(maybe)
 - [ ] Show sdcard statistics using [getfree](http://elm-chan.org/fsw/ff/doc/getfree.html)
 - [ ] Act as an emulator launcher to launch rom files
 - [ ] Maybe even become a firmware that can install and launch *.fw files
+

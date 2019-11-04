@@ -21,6 +21,7 @@ typedef enum FileType {
 	FileTypeMOD,
 	FileTypeWAV,
 	FileTypeFLAC,
+	FileTypeGME,
 
 	FileTypeJPEG,
 	FileTypePNG,

@@ -19,10 +19,12 @@ Features
 - Display Metadata/Details of files
 - Audio Player
 	- Supported Formats: MP3, OGG, WAV, FLAC, Modules(MOD,XM,IT,S3M)
+	- Experimental support for some chiptunes using [gme][gme]
 	- Plays all audio files in a folder as a playlist
 	- Audio can be played through Speaker or external DAC
 - Image viewer
 	- Opens small jpg, png, bmp files
+- Optionally can launch roms using go-play emulators
 
 There are a lot more ideas for features and improvements.
 You can find some of them in the [TODO.md](https://github.com/Paspartout/ogo-shell/blob/master/TODO.md) file.
@@ -83,6 +85,10 @@ Then simply run `make dist` to make the .fw file.
 Take a look at the [Makefile](Makefile) to see how it works and if you want
 to change the path to the mkfw utility.
 
+If you wan't to build the fw file that includes the emulators you can use the script at
+`tools/make_emus_fw.sh`. Before running it make sure you set the GO_PLAY_PATH to the path where
+your go-play repository is cloned at.
+
 Acknowledgements
 ----------------
 
@@ -93,7 +99,8 @@ Take a look at [LICENSE.template](LICENSE.template) for the license of his code.
 
 The name and concept of this application is inspired by the similar [3dshell] from joel16.
 
-The audio playing libraries used are [stb_vorbis][stb], [dr_mp3, dr_flac, dr_wav][drlibs] and [libxmp-lite].
+The audio playing libraries used are [stb_vorbis][stb], [dr_mp3, dr_flac, dr_wav][drlibs], [libxmp-lite]
+and [gme][gme].
 
 For the image viewer [stb_image][stb] is used.
 
@@ -116,3 +123,4 @@ Take a look at LICENSE for a copy of the license.
 [drlibs]: https://github.com/mackron/dr_libs 
 [libxmp-lite]: https://github.com/cmatsuoka/libxmp/tree/master/lite
 [3dshell]: https://github.com/joel16/3DShell
+[gme]: https://bitbucket.org/mpyne/game-music-emu/wiki/Home

@@ -133,6 +133,7 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeNone;
 	}
 
+	// Common music formats
 	if (!strncasecmp("mp3", &filename[len - 3], 3)) {
 		return FileTypeMP3;
 	} else if (!strncasecmp("ogg", &filename[len - 3], 3)) {
@@ -149,6 +150,8 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeWAV;
 	} else if (!strncasecmp("flac", &filename[len - 4], 4)) {
 		return FileTypeFLAC;
+
+	// Images
 	} else if (!strncasecmp("jpeg", &filename[len - 4], 4) || !strncasecmp("jpg", &filename[len - 3], 3)) {
 		return FileTypeJPEG;
 	} else if (!strncasecmp("png", &filename[len - 3], 3)) {
@@ -157,6 +160,8 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeBMP;
 	} else if (!strncasecmp("gif", &filename[len - 3], 3)) {
 		return FileTypeGIF;
+
+	// Emulators
 	} else if (!strncasecmp("gb", &filename[len - 2], 2)) {
 		return FileTypeGB;
 	} else if (!strncasecmp("gbc", &filename[len - 3], 3)) {
@@ -169,6 +174,28 @@ FileType fops_determine_filetype(Entry *entry)
 		return FileTypeCOL;
 	} else if (!strncasecmp("gg", &filename[len - 2], 2)) {
 		return FileTypeGG;
+
+	// GME: Game music emu
+	} else if (!strncasecmp("sap", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("spc", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("gbs", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("ay", &filename[len - 2], 2)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("hes", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("kss", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("nsf", &filename[len - 3], 3)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("nsfe", &filename[len - 4], 4)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("vgm", &filename[len - 4], 4)) {
+		return FileTypeGME;
+	} else if (!strncasecmp("vgmz", &filename[len - 4], 4)) {
+		return FileTypeGME;
 	}
 
 	return FileTypeNone;

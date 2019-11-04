@@ -47,6 +47,8 @@ static AudioCodec choose_codec(FileType ftype)
 		return AudioCodecFLAC;
 	case FileTypeWAV:
 		return AudioCodecWAV;
+	case FileTypeGME:
+		return AudioCodecGME;
 	default:
 		return AudioCodecUnknown;
 	}

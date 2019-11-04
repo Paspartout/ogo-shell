@@ -17,7 +17,7 @@ static int display_init2(void)
 		fprintf(stderr, "error initializing SDL: %s\n", SDL_GetError());
 		return -1;
 	}
-	window = SDL_CreateWindow("ogo-fm", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, DISPLAY_WIDTH * 4, DISPLAY_HEIGHT * 4,
+	window = SDL_CreateWindow("ogo-shell", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, DISPLAY_WIDTH * 4, DISPLAY_HEIGHT * 4,
 				  SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if (window == NULL) {
 		fprintf(stderr, "error creating SDL window: %s\n", SDL_GetError());

@@ -2,7 +2,7 @@
 
 set -e
 
-JOBS=16
+JOBS=$(nproc)
 GO_PLAY_PATH=../go-play-pelle
 MKFW=mkfw
 
@@ -24,6 +24,6 @@ SMSPLUSGX_BIN=$SMSPLUSGX_PATH/build/smsplusgx-go.bin
 
 make -j $JOBS
 
-$MKFW "${PROJECT_NAME}(${VERSION})" media/tile.raw 0 16 786432 "$PROJECT_NAME" ${APP_BIN} 0 17 786432 nesemu ${NESEMU_BIN} 0 18 786432 gnuboy ${GNUBOY_BIN} 0 19 1572864 smsplusgx ${SMSPLUSGX_BIN}
+$MKFW "${PROJECT_NAME}(${VERSION})" media/tile.raw 0 16 1048576 "$PROJECT_NAME" ${APP_BIN} 0 17 786432 nesemu ${NESEMU_BIN} 0 18 786432 gnuboy ${GNUBOY_BIN} 0 19 1572864 smsplusgx ${SMSPLUSGX_BIN}
 mv firmware.fw build/ogo-shell.emus.fw
 
