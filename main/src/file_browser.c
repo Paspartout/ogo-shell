@@ -111,11 +111,27 @@ static void ui_draw_browser(void)
 			filename = entry->name;
 		}
 
-		rect_t rt;
-		rt.x = 0;
-		rt.width = 11;
-		rt.height = 12;
-		if (S_ISDIR(entry->mode)) rt.y = 12; else rt.y = 0;
+		rect_t rt = {
+			.x = 0,
+			.y = 0,
+			.width = 11,
+			.height = 12
+		};
+
+		// TODO: Proper MIME Type handlers
+		const FileType ftype = fops_determine_filetype(entry);
+		if (S_ISDIR(entry->mode))
+			rt.y = 12;
+		else {
+			if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV || ftype == FileTypeFLAC || ftype == FileTypeGME) {
+				rt.y = 24;
+			} else if (ftype == FileTypeJPEG || ftype == FileTypePNG || ftype == FileTypeBMP || ftype == FileTypeGIF) {
+				rt.y = 36;
+			} else if (ftype == FileTypeGB || ftype == FileTypeGBC || ftype == FileTypeNES || ftype == FileTypeGG || ftype == FileTypeCOL || ftype == FileTypeSMS) {
+				rt.y = 48;
+			}
+		}
+
 		blit(fb, (rect_t){.x = 2, .y = rect_y + 2, .width = 11, .height = 12}, &img, rt);
 		tf_draw_str(fb, ui_font_white, filename, (point_t){.x = 15, .y = rect_y + 4});
 
