@@ -145,7 +145,7 @@ v0.3 - Image viewer and Keylock
 - [x] Update readme
 - [x] Release
 
-v0.4 - Chiptunes and optional Emulators
+v1.0 - Chiptunes and optional Emulators
 ---------------------------------------
 
 - [x] Use [gme](http://slack.net/~ant/libs/audio.html) to play gameboy/atari/nes tunes
@@ -157,11 +157,16 @@ v0.4 - Chiptunes and optional Emulators
 	- [ ] Adapt colorsheme and center on screen menu?
 	- [ ] Add confirmation dialog when quitting without saving state
 - [ ] Bugfixes and minor improvements
-        - [ ] Mono file playback
-        - [x] Remember old selection_pos when going back
-        - [ ] Show longer filenames when filesize is hidden
+	- [ ] Make icons backgrount transparent
+	- [ ] Mono file playback
+	- [ ] Skip songs that failed to play
+	- [x] Remember old selection_pos when going back
+	- [ ] Show longer filenames when filesize is hidden
+	- [ ] Going back in audio player should select appropriete entry in file browser
+	- [ ] Check Battery Protection
+	- [ ] All other github issues
 
-v1.0 - Polishing/UI Revamp
+v2.0 - Probably rewrite it
 --------------------------
 
 - [ ] Bookmark function
