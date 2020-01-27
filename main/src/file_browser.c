@@ -1,6 +1,7 @@
 #include <limits.h> /* PATH_MAX */
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include <time.h>
 
@@ -32,11 +33,40 @@
 static struct FileBrowser {
 	char cwd[PATH_MAX];
 	struct Entry *cwd_entries;
-	int n_entries;
-	int selection;
-	int scroll;
+	int n_entries; // number of cwd_entries
+	int selection; // which of n_entries is selected
+	int scroll;    // entry from which the list gets displayed on
 	bool stat_enabled;
 } browser;
+
+#define STACKSIZE 128
+
+static int selection_stack[128];
+static int scroll_stack[128];
+static int stack_top = 0;
+
+/// Push/Save selection and scroll to stack
+static void stack_push(void)
+{
+	selection_stack[stack_top] = browser.selection;
+	scroll_stack[stack_top] = browser.scroll;
+	if (++stack_top > STACKSIZE) {
+		stack_top = STACKSIZE;
+	}
+	//printf("pushed: sel:%d scroll:%d top:%d\n", browser.selection, browser.scroll, stack_top);
+}
+
+/// Pop/Load selection and scroll to stack
+static void stack_pop(void)
+{
+	if (--stack_top < 0) {
+		stack_top = 0;
+	}
+	browser.selection = selection_stack[stack_top];
+	browser.scroll = scroll_stack[stack_top];
+	//printf("popped: sel:%d scroll:%d top:%d\n", browser.selection, browser.scroll, stack_top);
+}
+
 
 /** Number of entries that can be displayed at once. */
 static const int MAX_WIN_ENTRIES = 13;
@@ -213,10 +243,12 @@ static int browser_cd(const char *new_cwd)
 	// Apply cd after successfully listing new directory
 	fops_free_entries(&browser.cwd_entries, browser.n_entries);
 	browser.n_entries = n_entries;
-	browser.selection = 0;
-	browser.scroll = 0;
 	browser.cwd_entries = new_entries;
 	strncpy(browser.cwd, new_cwd, PATH_MAX);
+	if (browser.selection >= browser.n_entries || browser.scroll >= browser.n_entries) {
+		browser.selection = 0;
+		browser.scroll = 0;
+	}
 
 	if (browser.stat_enabled)
 		fops_stat_entries(browser.cwd_entries, browser.n_entries, browser.cwd);
@@ -255,6 +287,10 @@ static int browser_cd_down(const char *dir)
 	char new_cwd[PATH_MAX];
 	const char *sep = !strncmp(browser.cwd, "/", 2) ? "" : "/"; // Don't append / if at /
 	snprintf(new_cwd, PATH_MAX, "%s%s%s", browser.cwd, sep, dir);
+
+	browser.scroll = 0;
+	browser.selection = 0;
+
 	return browser_cd(new_cwd);
 }
 
@@ -381,6 +417,7 @@ int file_browser(FileBrowserParam params)
 				}
 				Entry *entry = &browser.cwd_entries[browser.selection];
 				if (S_ISDIR(entry->mode)) {
+					stack_push();
 					browser_cd_down(entry->name);
 				} else {
 					open_file(entry);
@@ -388,6 +425,7 @@ int file_browser(FileBrowserParam params)
 				ui_draw_browser();
 			} break;
 			case KEYPAD_B:
+				stack_pop();
 				browser_cd_up();
 				ui_draw_browser();
 				break;
