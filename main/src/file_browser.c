@@ -24,6 +24,7 @@
 #include <audio_player.h>
 #include <image_viewer.h>
 #include <emulator_launcher.h>
+#include <icon_img.c>
 
 #ifndef SIM
 #include <esp_system.h>
@@ -106,6 +107,13 @@ static void ui_draw_browser(void)
 		return;
 	}
 
+	// Display icon image
+	gbuf_t img = {.width = (uint16_t)icon_img.width,
+		      .height = (uint16_t)icon_img.height,
+		      .bytes_per_pixel = 2,
+		      .data = (uint8_t *)&icon_img.pixel_data,
+		      .big_endian = false};
+
 	// Draw entries
 	for (int i = browser.scroll; i < browser.scroll + MAX_WIN_ENTRIES; i++) {
 		const int r = (i - browser.scroll); // window row in [0, 13]
@@ -124,7 +132,6 @@ static void ui_draw_browser(void)
 
 		// Draw filename
 		const Entry *entry = &browser.cwd_entries[i];
-		char item_str[64];
 		char fname_buf[41];
 		char *filename;
 		if (strlen(entry->name) > 40) {
@@ -133,8 +140,30 @@ static void ui_draw_browser(void)
 		} else {
 			filename = entry->name;
 		}
-		snprintf(item_str, 64, "%c - %s", (S_ISDIR(entry->mode)) ? 'd' : 'f', filename);
-		tf_draw_str(fb, ui_font_white, item_str, (point_t){.x = 2, .y = rect_y + 2});
+
+		rect_t rt = {
+			.x = 0,
+			.y = 0,
+			.width = 11,
+			.height = 12
+		};
+
+		// TODO: Proper MIME Type handlers
+		const FileType ftype = fops_determine_filetype(entry);
+		if (S_ISDIR(entry->mode))
+			rt.y = 12;
+		else {
+			if (ftype == FileTypeMP3 || ftype == FileTypeOGG || ftype == FileTypeMOD || ftype == FileTypeWAV || ftype == FileTypeFLAC || ftype == FileTypeGME) {
+				rt.y = 24;
+			} else if (ftype == FileTypeJPEG || ftype == FileTypePNG || ftype == FileTypeBMP || ftype == FileTypeGIF) {
+				rt.y = 36;
+			} else if (ftype == FileTypeGB || ftype == FileTypeGBC || ftype == FileTypeNES || ftype == FileTypeGG || ftype == FileTypeCOL || ftype == FileTypeSMS) {
+				rt.y = 48;
+			}
+		}
+
+		blit(fb, (rect_t){.x = 2, .y = rect_y + 2, .width = 11, .height = 12}, &img, rt);
+		tf_draw_str(fb, ui_font_white, filename, (point_t){.x = 15, .y = rect_y + 4});
 
 		// Draw file size
 		if (browser.stat_enabled) {
