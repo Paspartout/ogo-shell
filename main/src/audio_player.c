@@ -703,6 +703,7 @@ int audio_player(AudioPlayerParam params)
 	player_terminate();
 	free_playlist(&player_state);
 	keys_locked = false;
+	backlight_on = true;
 	backlight_percentage_set(50);
 
 	return 0;

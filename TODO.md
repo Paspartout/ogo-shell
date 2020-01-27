@@ -158,9 +158,8 @@ v0.4 - Chiptunes and optional Emulators
 	- [ ] Add confirmation dialog when quitting without saving state
 - [ ] Bugfixes and minor improvements
         - [ ] Mono file playback
-        - [ ] Remember old selection_pos when going back
+        - [x] Remember old selection_pos when going back
         - [ ] Show longer filenames when filesize is hidden
-        - [ ] Wrap around selection if hitting boundaries?
 
 v1.0 - Polishing/UI Revamp
 --------------------------
